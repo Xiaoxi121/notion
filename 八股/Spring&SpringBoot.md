@@ -865,22 +865,22 @@ public class DemoPublisher {
   ```
 
   - 一级缓存（singletonObjects）：**存放最终形态的 Bean（已经实例化、属性填充、初始化），**单例池，为“Spring 的单例属性”⽽⽣。一般情况我们获取 Bean 都是从这里获取的，但是并不是所有的 Bean 都在单例池里面，例如原型 Bean 就不在里面。
-  - 二级缓存（earlySingletonObjects）：**存放过渡 Bean（半成品，尚未属性填充），**也就是三级缓存中ObjectFactory产生的对象，与三级缓存配合使用的，可以防止 AOP 的情况下，每次调用ObjectFactory#getObject()都是会产生新的代理对象的。
-  - 三级缓存（singletonFactories）：**存放ObjectFactory，ObjectFactory的getObject()方法**（最终调用的是getEarlyBeanReference()方法）可以生成原始 Bean 对象或者代理对象（如果 Bean 被 AOP 切面代理）。三级缓存只会对单例 Bean 生效。
-
-- Spring创建Bean的流程
-
-  - **实例化 Bean**：Spring 在实例化 Bean 时，会先创建一个空的 Bean 对象，并将其放入一级缓存中。
-  - **属性赋值：**Spring 开始对 Bean 进行属性赋值，如果发现循环依赖，会将当前 Bean 对象提前暴露给后续需要依赖的 Bean（通过提前暴露的方式解决循环依赖）。
-  - **初始化 Bean：**完成属性赋值后，Spring 将 Bean 进行初始化，并将其放入二级缓存中。
-  - **注入依赖：**Spring 继续对 Bean 进行依赖注入，如果发现循环依赖，会从二级缓存中获取已经完成初始化的 Bean 实例
+  - 二级缓存（earlySingletonObjects）：**存放过渡 Bean（半成品，尚未属性填充），**也就是**三级缓存中ObjectFactory产生的对象，与三级缓存配合使用的，可以防止 AOP 的情况下，每次调用ObjectFactory#getObject()都是会产生新的代理对象的**。
+  - 三级缓存（singletonFactories）：**存放ObjectFactory，ObjectFactory的getObject()方法**（最终调用的是getEarlyBeanReference()方法）**可以生成原始 Bean 对象或者代理对象（如果 Bean 被 AOP 切面代理）**。三级缓存只会对单例 Bean 生效。
 
 - **如果发生循环依赖的话，就去 三级缓存 singletonFactories 中拿到三级缓存中存储的 ObjectFactory 并调用它的 getObject() 方法来获取这个循环依赖对象的前期暴露对象（虽然还没初始化完成，但是可以拿到该对象在堆中的存储地址了），并且将这个前期暴露对象放到二级缓存中，这样在循环依赖时，就不会重复初始化了！**
 
-  - 当 Spring 创建 A 之后，发现 A 依赖了 B ，又去创建 B，B 依赖了 A ，又去创建 A；
-  - 在 B 创建 A 的时候，那么此时 A 就发生了循环依赖，由于 A 此时还没有初始化完成，因此在 一二级缓存 中肯定没有 A；
-  - 那么此时就去三级缓存中调用 getObject() 方法去获取 A 的 前期暴露的对象 ，也就是调用上边加入的 getEarlyBeanReference() 方法，生成一个 A 的 前期暴露对象；
-  - 然后就将这个 ObjectFactory 从三级缓存中移除，并且将前期暴露对象放入到二级缓存中，那么 B 就将这个前期暴露对象注入到依赖，来支持循环依赖
+  - 具体流程是：
+    1、遍历待创建的所有beanName，第一次遍历，开始获取A，此时缓存中没有，会开始正常创建流程
+    2、A初始创建完成，然后**判断A是否是单例，且没有创建完毕，如果是，那么就会把A的beanFactory存入三级缓存**
+    3、A开始处理@Autowired注解，开始注入B属性，于是尝试从缓存获取B，获取不到，则开始正常创建B的流程
+    4、B初始创建完成，同样判断B是否是单例，且没有创建完毕，如果是，**那么就会把B的beanFactory存入三级缓存**
+    5、B开始处理@Autowired注解，开始注入A属性，于是依次从一级缓存、二级缓存查找A属性，都没有**就尝试从三级缓存获取A的beanFactory，通过beanFactory.getObject()方法获取A属性，接下来把A存入二级缓存，清除三级缓存。**因为此时能获取到A，所以B的A属性能填充成功，B接着执行初始化，**B处于实例化、初始化都完成的完全状态**
+    6、**B执行addSington(),把完全状态的B存入一级缓存，清空二三级缓存(实际只有三级有值)**
+    7、**A继续开始填充B属性，于是调用beanFactory.getBean()获取B，第六步已经把B存入一级缓存，此时直接返回，填充成功，继续执行初始化，得到一个完全状态的A**
+    8、**A执行addSington(),把完全状态的A存入一级缓存，清空二三级缓存(实际只有二级有值)**
+    **9、第二次遍历，开始获取B，此时一级缓存中有B，直接返回。**
+    至此A、B全部实例化、初始化完成
 
 - 只用两级缓存够吗
 
@@ -888,17 +888,17 @@ public class DemoPublisher {
 
 - 缺点
 
-  - 增加了内存开销（需要维护三级缓存，也就是三个 Map）
-  - 降低了性能（需要进行多次检查和转换）
-  - 还有少部分情况是不支持循环依赖的，比如非单例的 bean 和@Async注解的 bean 无法支持循环依赖
+  - **增加了内存开销**（需要维护三级缓存，也就是三个 Map）
+  - **降低了性能**（需要进行多次检查和转换）
+  - **还有少部分情况是不支持循环依赖的**，比如非单例的 bean 和@Async注解的 bean 无法支持循环依赖
 
 #### @Lazy能解决循环依赖吗？
 
 - **@Lazy 用来标识类是否需要懒加载/延迟加载，可作用在类上、方法上、构造器上、方法参数上、成员变量中**
   - **懒加载：不会在Spring IoC容器启动时立即实例化，而是在第一次被请求时才创建**
   - **非懒加载：在Spring IoC容器启动时立即实例化**
-- Spring Boot 2.2 新增了全局懒加载属性，开启后全局 bean 被设置为懒加载，需要时再去创建.
-  - 全局懒加载会让 Bean 第一次使用的时候加载会变慢，并且它会延迟应用程序问题的发现（当 Bean 被初始化时，问题才会出现）
+- Spring Boot 2.2 新增了全局懒加载属性**，开启后全局 bean 被设置为懒加载，需要时再去创建.**
+  - **全局懒加载会让 Bean 第一次使用的时候加载会变慢，并且它会延迟应用程序问题的发现（当 Bean 被初始化时，问题才会出现）**
 - @Lazy如何解决循环依赖
   - 没有 @Lazy 的情况下：在 Spring 容器初始化 A 时会立即尝试创建 B，而在创建 B 的过程中又会尝试创建 A，最终导致循环依赖（即无限递归，最终抛出异常）。
   - 使用 @Lazy 的情况下：**Spring 不会立即创建 B，而是会注入一个 B 的代理对象。由于此时 B 仍未被真正初始化，A 的初始化可以顺利完成。等到 A 实例实际调用 B 的方法时，代理对象才会触发 B 的真正初始化。**
@@ -918,7 +918,7 @@ Spring Boot通过Spring框架的事务管理模块来支持事务操作。事务
 
 #### Spring管理事务有几种？
 
-- **编程式事务**：在代码中硬编码(在分布式系统中推荐使用) : 通过 TransactionTemplate或者 TransactionManager 手动管理事务，事务范围过大会出现事务未提交导致超时，因此事务要比锁的粒度更小。
+- **编程式事务**：在代码中硬编码(在分布式系统中推荐使用) : 通过 TransactionTemplate或者 TransactionManager 手动管理事务**，事务范围过大会出现事务未提交导致超时，因此事务要比锁的粒度更小。**
 - **声明式事务：**在 XML 配置文件中配置或者直接基于注解（**单体应用或者简单业务系统**推荐使用） : 实际是通过 AOP 实现（基于@Transactional 的全注解方式使用最多）
 
 #### Spring事务中有哪几种事务传播行为？
@@ -927,21 +927,21 @@ Spring Boot通过Spring框架的事务管理模块来支持事务操作。事务
 
 正确的事务传播行为可能的值如下:
 
-1. TransactionDefinition.PROPAGATION_REQUIRED	
+1. TransactionDefinition**.PROPAGATION_REQUIRED**	
 
-   使用的最多的一个事务传播行为，我们平时经常使用的@Transactional注解默认使用就是这个事务传播行为。如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务。
+   使用的最多的一个事务传播行为，我们平时经常使用的@Transactional注解默认使用就是这个事务传播行为**。如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务。**
 
-2. TransactionDefinition.PROPAGATION_REQUIRES_NEW
+2. TransactionDefinition.PROPAGATION_REQUIRES_**NEW**
 
-   创建一个新的事务，如果当前存在事务，则把当前事务挂起。也就是说不管外部方法是否开启事务，Propagation.REQUIRES_NEW修饰的内部方法会新开启自己的事务，且开启的事务相互独立，互不干扰。
+   **创建一个新的事务，如果当前存在事务，则把当前事务挂起。**也就是说不管外部方法是否开启事务，Propagation.REQUIRES_NEW修饰的内部方法会新开启自己的事务，且开启的事务相互独立，互不干扰。
 
-3. TransactionDefinition.PROPAGATION_NESTED
+3. TransactionDefinition.PROPAGATION**_NESTED**
 
-   如果当前存在事务，则创建一个事务作为当前事务的嵌套事务来运行；如果当前没有事务，则该取值等价于TransactionDefinition.PROPAGATION_REQUIRED。
+   **如果当前存在事务，则创建一个事务作为当前事务的嵌套事务来运行**；如果当前没有事务，则该取值等价于TransactionDefinition.PROPAGATION_REQUIRED。
 
-4. TransactionDefinition.PROPAGATION_MANDATORY
+4. TransactionDefinition.PROPAGATION_**MANDATORY**
 
-   如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常。（mandatory：强制性）
+   **如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常**。（mandatory：强制性）
 
    这个使用的很少。
 
@@ -949,33 +949,33 @@ Spring Boot通过Spring框架的事务管理模块来支持事务操作。事务
 
    若是错误的配置以下 3 种事务传播行为，事务将不会发生回滚：
 
-   1. TransactionDefinition.PROPAGATION_SUPPORTS: 如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行。
-   2. TransactionDefinition.PROPAGATION_NOT_SUPPORTED: 以非事务方式运行，如果当前存在事务，则把当前事务挂起。
-   3. TransactionDefinition.PROPAGATION_NEVER: 以非事务方式运行，如果当前存在事务，则抛出异常
+   1. TransactionDefinition.PROPAGATION_**SUPPORTS: 如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行。**
+   2. TransactionDefinition.PROPAGATION_**NOT_SUPPORTED: 以非事务方式运行，如果当前存在事务，则把当前事务挂起。**
+   3. TransactionDefinition.PROPAGATION_**NEVER: 以非事务方式运行，如果当前存在事务，则抛出异常**
 
 #### @Transactional
 
 Exception 分为**运行时异常 RuntimeException 和非运行时异常**。在@Transactional注解中如果不配置rollbackFor属性,那么事务只会在遇到**RuntimeException的时候才会回滚**,加上**rollbackFor=Exception.class,可以让事务在遇到非运行时异常时也回滚。**
 
-- 作用于类：当把@Transactional 注解放在类上时，表示所有该类的 public 方法都配置相同的事务属性信息。
+- 作用于类：当把@Transactional 注解放在**类上时，表示所有该类的 public 方法**都配置相同的事务属性信息。
 - 作用于方法：当类配置了@Transactional，方法也配置了@Transactional，**方法的事务会覆盖类的事务配置信息。**该注解只能应用到public方法上，否则不生效。
-- 如果一个类或者一个类中的 public 方法上被标注@Transactional 注解的话，**Spring 容器就会在启动的时候为其创建一个代理类**，在**调用被@Transactional 注解的 public 方法的时候**，实际**调用的是，TransactionInterceptor 类中的 invoke()方法**。这个方法的作用就是在目标方法之前开启事务，方法执行过程中如果遇到异常的时候回滚事务，方法调用完成之后提交事务。
+- 如果一个类或者一个类中的 public 方法上被标注@Transactional 注解的话，**Spring 容器就会在启动的时候为其创建一个代理类**，在**调用被@Transactional 注解的 public 方法的时候**，实际**调用的是，TransactionInterceptor 类中的 invoke()方法**。这个方法的作用就是**在目标方法之前开启事务，方法执行过程中如果遇到异常的时候回滚事务，方法调用完成之后提交事务。**
 
 #### @Transactional事务注解原理
 
-@Transactional 的工作机制是基于 AOP 实现的，AOP 又是使用动态代理实现的。如果目标对象实现了接口，默认情况下会采用 JDK 的动态代理，如果目标对象没有实现了接口,会使用 CGLIB 动态代理。
+**@Transactional 的工作机制是基于 AOP 实现的，AOP 又是使用动态代理实现的。如果目标对象实现了接口，默认情况下会采用 JDK 的动态代理，如果目标对象没有实现了接口,会使用 CGLIB 动态代理。**
 
 #### Spring事务管理接口介绍
 
 Spring 框架中，事务管理相关最重要的 3 个接口如下：
 
 1. PlatformTransactionManager：（平台）事务管理器，Spring 事务策略的核心。
-2. TransactionDefinition：事务定义信息(**事务隔离级别、传播行为、超时、只读、回滚规则)**。
+2. **TransactionDefinition**：事务定义信息(**事务隔离级别、传播行为、超时、只读、回滚规则)**。
 3. TransactionStatus：事务运行状态。
 
 #### Spring AOP自调用问题
 
-当一个方法被标记了@Transactional 注解的时候，Spring 事务管理器只会在被其他类方法调用的时候生效，而不会在一个类中方法调用生效。
+当一个方法被标记了@Transactional 注解的时候，Spring 事务管理器**只会在被其他类方法调用的时候生效，而不会在一个类中方法调用生效。**
 
 这是因为 Spring AOP 工作原理决定的。因为 Spring AOP 使用动态代理来实现事务的管理，**它会在运行的时候为带有 @Transactional 注解的方法生成代理对象，并在方法调用的前后应用事物逻辑**。如果**该方法被其他类调用我们的代理对象就会拦截方法调用并处理事**务。但是**在一个类中的其他方法内部调用的时候，我们代理对象就无法拦截到这个内部调用，因此事务也就失效了。**
 
@@ -1012,7 +1012,7 @@ hasIpAddress(String) : 只允许指定 ip 的用户访问
 #### 如何对密码进行加密
 
 - 如果我们需要保存密码这类敏感数据到数据库的话，需要先加密再保存。
-- Spring Security 提供了多种加密算法的实现，开箱即用，非常方便。这些加密算法实现类的接口是 PasswordEncoder ，如果你想要自己实现一个加密算法的话，也需要实现 PasswordEncoder 接口。
+- Spring Security **提供了多种加密算法的实现，开箱即用，非常方便。这些加密算法实现类的接口是 PasswordEncoder ，如果你想要自己实现一个加密算法的话，也需要实现 PasswordEncoder 接口。**
 - PasswordEncoder 接口一共也就 3 个必须实现的方法。
 
 ```java
@@ -1029,8 +1029,8 @@ public interface PasswordEncoder {
 ```
 
 - 突然发现现有的加密算法无法满足我们的需求，需要更换成另外一个加密算法，这个时候应该怎么办呢？
-- 推荐的做法是通过 DelegatingPasswordEncoder 兼容多种不同的密码加密方案，以适应不同的业务需求。
-- 从名字也能看出来，DelegatingPasswordEncoder 其实就是一个代理类，并非是一种全新的加密算法，它做的事情就是代理上面提到的加密算法实现类。在 Spring Security 5.0 之后，默认就是基于 DelegatingPasswordEncoder 进行密码加密的
+- 推荐的做法是**通过 DelegatingPasswordEncoder 兼容多种不同的密码加密方案，以适应不同的业务需求。**
+- 从名字也能看出来，**DelegatingPasswordEncoder 其实就是一个代理类，并非是一种全新的加密算法，它做的事情就是代理上面提到的加密算法实现类。在 Spring Security 5.0 之后，默认就是基于 DelegatingPasswordEncoder 进行密码加密的**
 
 ------
 
@@ -1173,29 +1173,32 @@ Spring Boot 提供了三种 Web 容器，分别为 **Tomcat、Jetty 和 Undertow
 
 ### 6. 如何在SpringBoot应用程序中使用Jetty而不是Tomcat？
 
-Spring Boot（`spring-boot-starter-web`）使用 Tomcat 作为默认的嵌入式 servlet 容器。如果你想使用 Jetty，只需要修改 pom.xml（Maven）或 build.gradle（Gradle）就可以了。
+**Spring Boot（`spring-boot-starter-web`）使用 Tomcat 作为默认的嵌入式 servlet 容器。如果你想使用 Jetty，只需要修改 pom.xml（Maven）或 build.gradle（Gradle）就可以了。**
 
 ### 7.@SpringBootApplication
 
-把 `@SpringBootApplication` 看作是注解的集合。这三个注解的作用分别是：
+**把 `@SpringBootApplication`** 看作是注解的集合。这三个注解的作用分别是：
 
-1. `@EnableAutoConfiguration`：启用 SpringBoot 的自动配置机制。
-2. `@ComponentScan`：扫描被 `@Component` (`@Service`、`@Controller`) 注解的 bean，注解默认会扫描该类所在的包下的所有类。
-3. `@Configuration`：允许在上下文中注册额外的 bean 或导入其他配置类。
+1. **`@EnableAutoConfiguration`**：启用 SpringBoot 的自动配置机制。
+2. **`@ComponentScan`：**扫描被 `@Component` (`@Service`、`@Controller`) 注解的 bean，注解默认会扫描该类所在的包下的所有类。
+3. **`@Configuration`**：允许在上下文中注册额外的 bean 或导入其他配置类。
 
 ### 8. SpringBoot的自动配置是如何实现的
 
-1. 引入 Starter 组件
-2. SpringBoot 基于约定去寻找配置类
-3. SpringBoot 使用 ImportSelector 导入这些配置类，并根据 @Conditional 动态加载配置类里面的 Bean 到容器
+1. **引入 Starter 组件**
+2. SpringBoot 基于约定去**寻找配置类**
+3. SpringBoot 使用 ImportSelector **导入这些配置类**，并根据 @Conditional 动态加载配置类里面的 Bean 到容器
 
 4. **Spring Boot 的自动配置机制通过 @EnableAutoConfiguration 启动。**
-5. **该注解利用 @Import 注解导入了 AutoConfigurationImportSelector 类，而 AutoConfigurationImportSelector 类则负责加载并管理所有的自动配置类。**
-6. **这些自动配置类通常在 META-INF/spring.factories 文件中声明，并根据项目的依赖和配置条件，通过条件注解（如 @ConditionalOnClass、@ConditionalOnBean 等）判断是否应该生效。**
+   1. **该注解利用 @Import 注解导入了 AutoConfigurationImportSelector 类，而 AutoConfigurationImportSelector 类则负责加载并管理所有的自动配置类。**
+      1. **这些自动配置类通常在 META-INF/spring.factories 文件中声明，并根据项目的依赖和配置条件，通过条件注解（如 @ConditionalOnClass、@ConditionalOnBean 等）判断是否应该生效。**
+
+
+引入starter组件、寻找并导入配置类、自动配置机制通过@enableautoconfiguration——加载并管理所有的自动配置类——根据项目的依赖和配置条件，通过条件注解等判断是否应该生效。
 
 ### 怎么理解SpringBoot中的约定大于配置
 
-总结来说，在 Spring Boot 中，“约定大于配置”的理念意味着框架为开发者提供了许多内置的默认设置和行为，减少了需要显式配置的项。以下是几个关键点：
+总结来说，在 Spring Boot 中，“约定大于配置”的理念意味着**框架为开发者提供了许多内置的默认设置和行为，减少了需要显式配置的项**。以下是几个关键点：
 
 1. **自动化配置**：Spring Boot 根据你添加到项目中的依赖关系，自动配置应用程序所需的组件和服务。例如，如果你添加了一个 JPA 依赖，Spring Boot 就会自动配置数据库连接和其他相关的 JPA 组件。
 
@@ -1227,12 +1230,12 @@ Spring Bean 相关：
 
 前后端传值：
 
-- @RequestParam 以及 @PathVariable：@PathVariable 用于获取路径参数，@RequestParam 用于获取查询参数。
-- @RequestBody：用于读取 Request 请求（可能是 POST,PUT,DELETE,GET 请求）的 body 部分并且 Content-Type 为 application/json 格式的数据，收到数据之后会自动将数据绑定到 Java 对象上去。系统会使用 HttpMessageConverter 或者自定义的 HttpMessageConverter 将请求的 body 中的 json 字符串转换为 Java 对象。
+- @RequestParam 以及 @PathVariable：**@PathVariable 用于获取路径参数，@RequestParam 用于获取查询参数。**
+- @RequestBody：**用于读取 Request 请求（可能是 POST,PUT,DELETE,GET 请求）的 body 部分并且 Content-Type 为 application/json 格式的数据**，收到数据之后会**自动将数据绑定到 Java 对象上去。**系统会使用 HttpMessageConverter 或者自定义的 HttpMessageConverter 将请求的 body 中的 json 字符串转换为 Java 对象。
 
 ### 10.SpringBoot常用两种配置文件
 
-application.properties或者application.yml
+**application.properties或者application.yml**
 
 ### 11. YAML是什么？优缺点？
 
@@ -1259,13 +1262,13 @@ YAML 是一种人类可读的数据序列化语言。它通常用于配置文件
 
 ### 15. SpringBoot如何监控系统实际运行状况
 
-使用SpringBootActuator
+使用**SpringBootActuator**
 
 ### 18. SpringBoot中实现定时任务
 
-@Scheduled
+**@Scheduled**
 
-单纯依靠 `@Scheduled` 注解还不行，我们需要在 SpringBoot 中我们在启动类上加上 `@EnableScheduling` 注解，这样才可以启动定时任务。`@EnableScheduling` 注解的作用是发现注解 `@Scheduled` 的任务并在后台执行该任务。
+单纯依靠 `@Scheduled` 注解还不行，我们需要**在 SpringBoot 中我们在启动类上加上 `@EnableScheduling` 注解**，这样才可以启动定时任务。`@EnableScheduling` 注解的作用是发现注解 `@Scheduled` 的任务并在后台执行该任务。
 
 ### 19. SpringBoot自动装配
 
@@ -1333,9 +1336,9 @@ public class SpringSecurityJwtGuideApplication {
 
 可以把 @SpringBootApplication看作是 @Configuration、@EnableAutoConfiguration、@ComponentScan 注解的集合
 
-1. @EnableAutoConfiguration：启用 SpringBoot 的自动配置机制
-2. @ComponentScan：扫描被@Component (@Repository,@Service,@Controller)注解的 bean，注解默认会扫描该类所在的包下所有的类。
-3. @Configuration：允许在 Spring 上下文中注册额外的 bean 或导入其他配置类
+1. **@EnableAutoConfiguration：启用 SpringBoot 的自动配置机制**
+2. **@ComponentScan：**扫描被@Component (@Repository,@Service,@Controller)注解的 bean，注解默认会扫描该类所在的包下所有的类。
+3. **@Configuration：允许在 Spring 上下文中注册额外的 bean 或导入其他配置类**
 
 ### Spring相关
 
@@ -1352,17 +1355,17 @@ public class SpringSecurityJwtGuideApplication {
 
 #### @RestController
 
-@RestController注解是@Controller和@ResponseBody的合集,表示这是个控制器 bean,并且是将函数的返回值直接填入 HTTP 响应体中,是 REST 风格的控制器。
+@RestController注解是**@Controller和@ResponseBody的合集**,表示这是个控制器 bean,并且是**将函数的返回值直接填入 HTTP 响应体中,是 REST 风格的控制器。**
 
 单独使用 @Controller 不加 @ResponseBody的话一般是用在要返回一个视图的情况，这种情况属于比较传统的 Spring MVC 的应用，对应于前后端不分离的情况。@Controller +@ResponseBody 返回 JSON 或 XML 形式数据
 
 #### @Scope
 
 - 四种常见的 Spring Bean 的作用域：
-  - singleton : 唯一 bean 实例，Spring 中的 bean 默认都是单例的。
-  - prototype : 每次请求都会创建一个新的 bean 实例。
-  - request : 每一次 HTTP 请求都会产生一个新的 bean，该 bean 仅在当前 HTTP request 内有效。
-  - session : 每一个 HTTP Session 会产生一个新的 bean，该 bean 仅在当前 HTTP session 内有效。
+  - **singleton : 唯一 bean 实例，Spring 中的 bean 默认都是单例的。**
+  - **prototype : 每次请求都会创建一个新的 bean 实例。**
+  - **request : 每一次 HTTP 请求都会产生一个新的 bean，该 bean 仅在当前 HTTP request 内有效。**
+  - **session : 每一个 HTTP Session 会产生一个新的 bean，该 bean 仅在当前 HTTP session 内有效。**
 
 #### @Configuration
 
@@ -1443,7 +1446,7 @@ class LibraryProperties {
 
 ### 参数校验
 
-所有的注解，推荐使用 JSR 注解，即javax.validation.constraints，而不是org.hibernate.validator.constraint
+**所有的注解，推荐使用 JSR 注解**，即javax.validation.constraints，而不是org.hibernate.validator.constraint
 
 #### 1. 常用的字段验证注解
 
@@ -1507,7 +1510,7 @@ public class PersonController {
 
 #### 3.验证请求参数（Path Variables 和Request Parameters）
 
-一定一定不要忘记在类上加上 @Validated 注解了，这个参数可以告诉 Spring 去校验方法参数。
+**一定一定不要忘记在类上加上 @Validated 注解了，这个参数可以告诉 Spring 去校验方法参数。**
 
 ```java
 @RestController
@@ -1524,8 +1527,8 @@ public class PersonController {
 
 ### 全局处理Controller层异常
 
-@ControllerAdvice :注解定义全局异常处理类
-@ExceptionHandler :注解声明异常处理方法
+**@ControllerAdvice :注解定义全局异常处理类**
+**@ExceptionHandler :注解声明异常处理方法**
 
 SpringBoot借助@RestControllerAdvice和@ExceptionHandler实现全局统一异常处理
 
@@ -1537,10 +1540,10 @@ SpringBoot借助@RestControllerAdvice和@ExceptionHandler实现全局统一异�
 2. @Table 设置表名
 3. @Id：声明一个字段为主键。
    1. 通过 @GeneratedValue直接使用 JPA 内置提供的四种主键生成策略来指定主键生成策略。	
-      1. TABLE
-      2. SEQUENCE
-      3. IDENTITY
-      4. AUTO
+      1. **TABLE**
+      2. **SEQUENCE**
+      3. **IDENTITY**
+      4. **AUTO**
    2. 通过 @GenericGenerator声明一个主键策略，然后 @GeneratedValue使用这个策略
 4. @Column 声明字段。
 5. @Transient：声明不需要与数据库映射的字段，在保存的时候不需要保存进数据库
@@ -1564,6 +1567,8 @@ Exception 分为**运行时异常 RuntimeException 和非运行时异常**。在
 ## MyBatis常见面试题总结
 
 ### 与传统的JDBC相比，MyBatis的优点？
+
+**基于sql、减少代码量、与各种数据库兼容、集成spring、提供映射标签**
 
 - **基于 SQL 语句编程，相当灵活，**不会对应用程序或者数据库的现有设计造成任 何影响，SQL 写在 XML 里，解除 sql 与程序代码的耦合，便于统一管理；提供 XML 标签，支持编写动态 SQL 语句，并可重用。
 - 与 JDBC 相比，**减少了 50%以上的代码量，**消除了 JDBC 大量冗余的代码，不 需要手动开关连接；
@@ -1595,21 +1600,47 @@ Exception 分为**运行时异常 RuntimeException 和非运行时异常**。在
 
 MybatisPlus是一个基于MyBatis的增强工具库，旨在简化开发并提高效率。以下是MybatisPlus和MyBatis之间的一些主要区别：
 
-1. **CRUD操作**：MybatisPlus通过继承BaseMapper接口，提供了一系列内置的快捷方法，使得CRUD操作更加简单，无需编写重复的SQL语句。
+1. **CRUD操作**：MybatisPlu**s通过继承BaseMapper接口，提供了一系列内置的快捷方法，使得CRUD操作更加简单，无**需编写重复的SQL语句。
 2. **代码生成器**：MybatisPlus提供了代码生成器功能，可以根据数据库表结构自动生成实体类、Mapper接口以及XML映射文件，减少了手动编写的工作量。
-3. **通用方法封装**：MybatisPlus封装了许多常用的方法，如条件构造器、排序、分页查询等，简化了开发过程，提高了开发效率。
-4. **分页插件：**MybatisPlus内置了分页插件，支持各种数据库的分页查询，开发者可以轻松实现分页功能，而在传统的MyBatis中，需要开发者自己手动实现分页逻辑。
+3. **通用方法封装**：MybatisPlu**s封装了许多常用的方法，如条件构造器、排序、分页查询**等，简化了开发过程，提高了开发效率。
+4. **分页插件：**MybatisPlus内**置了分页插件**，支持各种数据库的分页查询，开发者可以轻松实现分页功能，而在传统的MyBatis中，需要开发者自己手动实现分页逻辑。
 5. **多租户支持**：MybatisPlus提供了多租户的支持，可以轻松实现多租户数据隔离的功能。
-6. **注解支持：**MybatisPlus引入了更多的注解支持，使得开发者可以通过注解来配置实体与数据库表之间的映射关系，减少了XML配置文件的编写。
+6. **注解支持：**MybatisPlus引入了**更多的注解支持，**使得开发者可以通过注解来配置实体与数据库表之间的映射关系，减少了XML配置文件的编写。
 
 ### #{} 和 ${} 的区别是什么？
 
 1. ${}是 **Properties 文件**中的**变量占位符，**它可以用于**标签属性值和 sql 内部，属于原样文本替换**，可以替换任意内容，比如${driver}会被原样替换为com.mysql.jdbc. Driver。
-2. #{}是 **sql 的参数占位符**，MyBatis **会将 sql 中的#{}替换为? 号，**在 sql 执行前会使用 PreparedStatement 的参数设置方法，**按序给 sql 的? 号占位符设置参数值**，比如 ps.setInt(0, parameterValue)，#{item.name} 的取值方式为使用反射从参数对象中获取 item 对象的 name 属性值，相当于 param.getItem().getName()
+2. #{}是 **sql 的参数占位符**，MyBatis **会将 sql 中的#{}替换为? 号，**在 sql 执行前会使用 PreparedStatement 的参数设置方法，**按序给 sql 的? 号占位符设置参数值**，比如 ps.setInt(0, parameterValue)，#{item.name} 的取值方式为使用反射从参数对象中获取 item 对象的 name 属性值，相当于 param.getItem().getName()    **防止SQL注入攻击**
+
+### 什么是SQL注入
+
+SQL注入（SQL Injection）是一种常见的安全漏洞，它发生在应用程序将不可信的数据作为SQL命令的一部分发送给数据库时。攻击者可以通过在输入字段中插入恶意的SQL代码来操纵或欺骗数据库执行非授权的操作。这种攻击可以导致敏感数据泄露、数据篡改甚至是整个数据库的破坏。
+
+SQL注入的工作原理
+SQL注入攻击通常涉及以下几个步骤：
+
+- **输入数据：攻击者向应用程序的输入字段提供包含恶意SQL代码的数据。**
+- **构造SQL查询：应用程序将用户提供的数据合并到SQL查询中。**
+- **执行查询：数据库执行SQL查询，包括恶意代码。**
+
+结果：恶意代码被执行，导致非预期的行为，如数据泄露或破坏。
+
+
+为了防御SQL注入攻击，可以采取以下几种措施：
+
+1. **使用参数化查询：使用预编译的SQL语句（如 PreparedStatement 在Java中），可以将用户输入作为参数而不是直接拼接进SQL语句中。**
+
+2. 使用ORM框架：现代的ORM（对象关系映射）框架，如Hibernate、MyBatis等，通常会自动处理SQL注入问题。
+
+3. **输入验证和清理：对所有输入数据进行验证和清理，确保只接受合法的数据格式。**
+
+4. 最小权限原则：应用程序使用的数据库账户应只具有完成任务所需的最小权限，避免执行超出范围的操作。
+
+5. **使用Web应用防火墙（WAF）：WAF可以帮助检测并阻止SQL注入攻击尝试**
 
 ### xml 映射文件中，除了常见的 select、insert、update、delete 标签之外，还有哪些标签？
 
-<resultMap>、 <parameterMap>、 <sql>、 <include>、 <selectKey> ，加上动态 sql 的 9 个标签， trim|where|set|foreach|if|choose|when|otherwise|bind 等，其中 <sql> 为 sql 片段标签，通过 <include> 标签引入 sql 片段， <selectKey> 为不支持自增的主键生成策略标签
+**<resultMap>、 <parameterMap>、 <sql>、 <include>、 <selectKey> ，加上动态 sql 的 9 个标签，** trim|where|set|foreach|if|choose|when|otherwise|bind 等，其中 <sql> 为 sql 片段标签，通过 <include> 标签引入 sql 片段， <selectKey> 为不支持自增的主键生成策略标签
 
 ### Dao 接口的工作原理是什么？Dao 接口里的方法，参数不同时，方法能重载吗？
 
@@ -1629,81 +1660,85 @@ MybatisPlus是一个基于MyBatis的增强工具库，旨在简化开发并提�
 
 ### 简述 MyBatis 的插件运行原理，以及如何编写一个插件
 
-- MyBatis 仅可以编写针对 ParameterHandler、 ResultSetHandler、 StatementHandler、 Executor 这 4 种接口的插件**，MyBatis 使用 JDK 的动态代理，为需要拦截的接口生成代理对象以实现接口方法拦截功能**，每当执行这 4 种接口对象的方法时，就会进入拦截方法，具体就是 InvocationHandler 的 invoke() 方法，当然，只会拦截那些你指定需要拦截的方法。
+- MyBatis 仅可以编写**针对 ParameterHandler、 ResultSetHandler、 StatementHandler、 Executor 这 4** 种接口的插件**，MyBatis 使用 JDK 的动态代理，为需要拦截的接口生成代理对象以实现接口方法拦截功能**，每**当执行这 4 种接口对象的方法时，就会进入拦截方法，具体就是 InvocationHandler 的 invoke() 方法，当然，只会拦截那些你指定需要拦截的方法。**
 - 实现 MyBatis 的 Interceptor 接口并复写 intercept() 方法，然后在给插件编写注解，指定要拦截哪一个接口的哪些方法即可，记住，别忘了在配置文件中配置你编写的插件。
 
 ### MyBatis 执行批量插入，能返回数据库主键列表吗？
 
-能
+**能**
 
 ### MyBatis 动态 sql 是做什么的？都有哪些动态 sql？能简述一下动态 sql 的执行原理不？
 
 - MyBatis 动态 sql 可以让我们**在 xml 映射文件内，以标签的形式编写动态 sql，完成逻辑判断和动态拼接 sql 的功能。**其执行原理为，使用 OGNL 从 sql 参数对象中计算表达式的值，根据表达式的值动态拼接 sql，以此来完成动态 sql 的功能。
-- yBatis 提供了 9 种动态 sql 标签:
-  <if></if>
-  <where></where>(trim,set)
-  <choose></choose>（when, otherwise）
-  <foreach></foreach>
-  <bind/>
+- **yBatis 提供了 9 种动态 sql 标签:**
+  **<if></if>**
+  **<where></where>(trim,set)**
+  **<choose></choose>（when, otherwise）**
+  **<foreach></foreach>**
+  **<bind/>**
 
 ### MyBatis 是如何将 sql 执行结果封装为目标对象并返回的？都有哪些映射形式？
 
 - 第一种是**使用 <resultMap> 标签，逐一定义列名和对象属性名之间的映射关系**
 - 第二种是使**用 sql 列的别名功能，将列别名书写为对象属性名**，比如 T_NAME AS NAME，对象属性名一般是 name，小写，但是列名不区分大小写，MyBatis 会忽略列名大小写，智能找到与之对应对象属性名
-- 有了列名与属性名的映射关系后，MyBatis 通过反射创建对象，同时使用反射给对象的属性逐一赋值并返回，那些找不到映射关系的属性，是无法完成赋值的。
+- 有了列名与属性名的映射关系后**，MyBatis 通过反射创建对象，同时使用反射给对象的属性逐一赋值并返回，**那些找不到映射关系的属性，是无法完成赋值的。
 
 ### MyBatis 能执行一对一、一对多的关联查询吗？都有哪些实现方式，以及它们之间的区别
 
-- 能，MyBatis 不仅可以执行一对一、一对多的关联查询，还可以执行多对一，多对多的关联查询，多对一查询，其实就是一对一查询，只需要把 selectOne() 修改为 selectList() 即可；多对多查询，其实就是一对多查询，只需要把 selectOne() 修改为 selectList() 即可
-- 关联对象查询，有两种实现方式，
+- 能，MyBatis 不仅可以执行一对一、一对多的关联查询，还可以执行多对一，多对多的关联查询，**多对一查询，其实就是一对一查询，只需要把 selectOne() 修改为 selectList() 即可；多对多查询，其实就是一对多查询，只需要把 selectOne() 修改为 selectList() 即可**
+- **关联对象查询，有两种实现方式，**
   - 一种是**单独发送一个 sql** 去查询关联对象，赋给主对象，然后返回主对象。
   - 另一种是使用**嵌套查询，**嵌套查询的含义为使用 join 查询，一部分列是 A 对象的属性值，另外一部分列是关联对象 B 的属性值，好处是只发一个 sql 查询，就可以把主对象和其关联对象查出来
-  - join 查询出来 100 条记录，如何确定主对象是 5 个，而不是 100 个？其去重复的原理是 <resultMap> 标签内的 <id> 子标签，指定了唯一确定一条记录的 id 列，MyBatis 根据 <id> 列值来完成 100 条记录的去重复功能， <id> 可以有多个，代表了联合主键的语意。
+  - **join 查询出来 100 条记录，如**何确定主对象是 5 个，而不是 100 个？其去重复的原理是 <resultMap> 标签内的 <id> 子标签，指定了唯一确定一条记录的 id 列，MyBatis 根据 <id> 列值来完成 100 条记录的去重复功能， <id> 可以有多个，代表了联合主键的语意。
 
 ### MyBatis 是否支持延迟加载？如果支持，它的实现原理是什么？
 
-- **MyBatis 仅支持 association 关联对象和 collection 关联集合对象的延迟加载**，association 指的就是一对一，collection 指的就是一对多查询。在 MyBatis 配置文件中，可以配置是否启用延迟加载 lazyLoadingEnabled=true|false。
-- 它的原理是，使用 CGLIB 创建目标对象的代理对象，当调用目标方法时，进入拦截器方法，比如调用 a.getB().getName() ，**拦截器 invoke() 方法发现 a.getB() 是 null 值，那么就会单独发送事先保存好的查询关联 B 对象的 sql，把 B 查询上来，然后调用 a.setB(b)，于是 a 的对象 b 属性就有值了，接着完成 a.getB().getName() 方法的调用。**这就是延迟加载的基本原理。
+- **MyBatis 仅支持 association 关联对象和 collection 关联集合对象的延迟加载**，association 指的就是**一对一**，collection 指的就**是一对多查询**。在 MyBatis 配置文件中，**可以配置是否启用延迟加载 lazyLoadingEnabled=true|fals**e。
+- 它的原理是**，使用 CGLIB 创建目标对象的代理对象，当调用目标方法时，进入拦截器方法，**比如调用 a.getB().getName() ，**拦截器 invoke() 方法发现 a.getB() 是 null 值，那么就会单独发送事先保存好的查询关联 B 对象的 sql，把 B 查询上来，然后调用 a.setB(b)，于是 a 的对象 b 属性就有值了，接着完成 a.getB().getName() 方法的调用。**这就是延迟加载的基本原理。
 
 ### MyBatis 的 xml 映射文件中，不同的 xml 映射文件，id 是否可以重复？
 
-- 不同的 xml 映射文件，如果配置了 namespace，那么 id 可以重复；如果没有配置 namespace，那么 id 不能重复；毕竟 namespace 不是必须的，只是最佳实践而已。
-- 原因**就是 namespace+id 是作为 Map<String, MappedStatement> 的 key 使用的**，如果没有 namespace，就剩下 id，那么，id 重复会导致数据互相覆盖。有了 namespace，自然 id 就可以重复，namespace 不同，namespace+id 自然也就不同
+- **不同的 xml 映射文件，如果配置了 namespace，那么 id 可以重复；如果没有配置 namespace，那么 id 不能重复；**毕竟 namespace 不是必须的，只是最佳实践而已。
+- 原因**就是 namespace+id 是作为 Map<String, MappedStatement> 的 key 使用的**，如果没有 namespace，就剩下 id，那**么，id 重复会导致数据互相覆盖。有了 namespace，自然 id 就可以重复，namespace 不同，namespace+id 自然也就不同**
 
 ### MyBatis 中如何执行批处理？
 
-使用 BatchExecutor 完成批处理
+使用 **BatchExecutor 完成批处理**
 
 ### MyBatis 都有哪些 Executor 执行器？它们之间的区别是什么？
 
 1. **SimpleExecutor：** 每**执行一次 update 或 select，就开启一个 Statement 对象，**用完立刻关闭 Statement 对象。
 2. ReuseExecutor： 执行 update 或 select，以 sql 作为 key 查找 Statement 对象，**存在就使用，不存在就创建，**用完后，不关闭 Statement 对象，而是放置于 Map<String, Statement>内，供下一次使用。简言之，就是重复使用 Statement 对象。
 3. BatchExecutor：**执行 update（没有 select，JDBC 批处理不支持 select），将所有 sql 都添加到批处理中（addBatch()），等待统一执行（executeBatch()），它缓存了多个 Statement 对象，每个 Statement 对象都是 addBatch()完毕后，等待逐一执行 executeBatch()批处理**。与 JDBC 批处理相同。
-4. 作用范围：Executor 的这些特点，都严格限制在 SqlSession 生命周期范围内
+4. 作用范围：Executor 的这些特点**，都严格限制在 SqlSession 生命周期范围内**
 
 ### MyBatis 中如何指定使用哪一种 Executor 执行器？
 
-MyBatis 配置文件中，可以指定默认的 ExecutorType 执行器类型，也可以手动给 DefaultSqlSessionFactory 的创建 SqlSession 的方法传递 ExecutorType 类型参数
+MyBatis 配置文件中，可以**指定默认的 ExecutorType 执行器类型，**也可**以手动给 DefaultSqlSessionFactory 的创建 SqlSession 的方法传递 ExecutorType 类型参**数
 
 ### MyBatis 是否可以映射 Enum 枚举类？
 
-MyBatis 可以映射枚举类，不单可以映射枚举类，**MyBatis 可以映射任何对象到表的一列上。**映射方式**为自定义一个 TypeHandler ，实现 TypeHandler 的 setParameter() 和 getResult() 接口方法**。 TypeHandler 有两个作用：
+MyBatis 可以映射枚举类，不单可以映射枚举类，**MyBatis 可以映射任何对象到表的一列上。**
+
+映射方式**为自定义一个 TypeHandler ，实现 TypeHandler 的 setParameter() 和 getResult() 接口方法**。 
+
+TypeHandler 有两个作用：
 
 - 一是完成从 javaType 至 jdbcType 的转换；
 - 二是完成 jdbcType 至 javaType 的转换，体现为 setParameter() 和 getResult() 两个方法，分别代表设置 sql 问号占位符参数和获取列查询结果。
 
 ### MyBatis 映射文件中，如果 A 标签通过 include 引用了 B 标签的内容，请问，B 标签能否定义在 A 标签的后面，还是说必须定义在 A 标签的前面？
 
-虽然 MyBatis 解析 xml 映射文件是按照顺序解析的，但是，被引用的 B 标签依然可以定义在任何地方，MyBatis 都可以正确识别。
-原理是，MyBatis 解析 A 标签，发现 A 标签引用了 B 标签，但是 B 标签尚未解析到，尚不存在，此时，MyBatis 会将 A 标签标记为未解析状态，然后继续解析余下的标签，包含 B 标签，待所有标签解析完毕，MyBatis 会重新解析那些被标记为未解析的标签，此时再解析 A 标签时，B 标签已经存在，A 标签也就可以正常解析完成了。
+虽然 MyBatis 解析 xml 映射文件是按照顺序解析的，**但是，被引用的 B 标签依然可以定义在任何地方，MyBatis 都可以正确识别。**
+原理是，MyBatis 解析 A 标签，发现 A 标签引用了 B 标签，但是 B 标签尚未解析到，尚不存在，**此时，MyBatis 会将 A 标签标记为未解析状态，然后继续解析余下的标签，包含 B 标签，待所有标签解析完毕，MyBatis 会重新解析那些被标记为未解析的标签，**此时再解析 A 标签时，B 标签已经存在，A 标签也就可以正常解析完成了。
 
-### 简述 MyBatis 的 xml 映射文件和 MyBatis 内部数据结构之间的映射关系？
+### 简述 MyBatis 的 xml 映射文件和 MyBatis 内部数据结构之间的映射关 系？
 
 MyBatis 将所有 xml 配置信息都封装到 All-In-One 重量级对象 Configuration 内部。
 
-- 在 xml 映射文件中， <parameterMap> 标签会被解析为 ParameterMap 对象，其每个子元素会被解析为 ParameterMapping 对象。
--  <resultMap> 标签会被解析为 ResultMap 对象，其每个子元素会被解析为 ResultMapping 对象。
-- 每一个 <select>、<insert>、<update>、<delete> 标签均会被解析为 MappedStatement 对象，标签内的 sql 会被解析为 BoundSql 对象。
+- 在 xml 映射文件中， **<parameterMap> 标签会被解析为 ParameterMap 对象，其每个子元素会被解析为 ParameterMapping 对象。**
+-  **<resultMap> 标签会被解析为 ResultMap 对象，其每个子元素会被解析为 ResultMapping 对象。**
+- 每一个 **<select>、<insert>、<update>、<delete> 标签均会被解析为 MappedStatement 对象，标签内的 sql 会被解析为 BoundSql 对象。**
 
 ### 为什么说 MyBatis 是半自动 ORM 映射工具？它与全自动的区别在哪里？
 
