@@ -3722,7 +3722,7 @@ public final class DateTimeUtils extends DateUtils {
       - **PrivateMessageResultResultTask从redis中定时拉取私聊消息推送结果**
       - **messagelistenerMulticaster向业务层的监听器广播消息推送结果**
         - 推送成功：从unsend变为sended
-        - 未成功：继续保持sended
+        - 未成功：继续保持unsend
 
 拉取离线消息
 
@@ -4107,6 +4107,10 @@ public class PrivateMessageListener implements MessageListener<PrivateMessageVO>
 
 对于重复消息的讨论，我们留到唯一性讨论。
 
+![image-20241015222041511](D:\2024\Notes\Typora\zrt\boxim.assets\image-20241015222041511.png)
+
+
+
 ### 顺序性
 
 消息的有序性分为**全局有序**和**局部有序。**
@@ -4119,6 +4123,20 @@ public class PrivateMessageListener implements MessageListener<PrivateMessageVO>
 - 消息投递的队列是由接收方的用户id决定，相同的用户的消息会进入相同的队列
 - im-server通过单线程同步方式顺序处理队列的消息
 
+- **步骤1,2:** 出现:“后发先至”情况，即用户后面发的消息被服务器先处理了。
+
+  前端发送消息的请求先放入一个先进先出的队列中，只有当前面的消息发送完成后，才发送下一条消息
+
+- **步骤3.4:** im-server从redis拉取到2,3,4号消息，没有按照顺序推送
+
+  1.同一个会话的消息会进入相同的队列，保证了从redis取出的消息是有序的。
+
+  2.而且必须取出来的消息完成发送后，才会去拉取下一批消息，保证了不会在多个线程同时推送消息
+
+- **步骤5：**有一种极端情况，当"张三"上线时，拉取id为100-200的离线消息，当推送到150号消息时，“李四”发来了201号消息，此时消息顺序变成100...150,201,151...200
+
+  是会有这种情况，所以还需要在客户端做最后一层保证。即根据消息id大小进行判断，如果接受到的消息id<maxId，则需要将消息插入到会话中合适的位置，而不是直接插入到最后
+
 ### 唯一性
 
 前面讨论可靠性时提过，盒子IM采用的是"最少一次"的消息推送策略。也就是说，在极端情况下，是有可能出现将重复的消息投递给用户。
@@ -4126,6 +4144,10 @@ public class PrivateMessageListener implements MessageListener<PrivateMessageVO>
 其实盒子IM的服务器端并未对消息的唯一性做校验，而是交给了前端进行处理。1前端处理也十分简单：每条消息都携带了唯一的id,接收到消息后，利用id判断消息是否已存在，如果已存在，则丢弃或覆盖即可。
 
 /**利用缓存将消息的messageId存储起来，当重发过后对消息进行去重，来防止消息重复，同时设置一个过期时间，来释放空间**
+
++布隆过滤器
+
+
 
 ## 8.5 可靠性
 
