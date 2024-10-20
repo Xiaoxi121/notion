@@ -1,152 +1,95 @@
-# Todolist
 
-# **Java手写RPC框架系列-01-开篇**
 
-代码地址：https://github.com/youngyangyang04/RPC-Java 
-
-## **项目背景与简单介绍**
-
-### **项目背景**
-
-随着业务不断升级，系统规模不断扩大， 单体架构会产生越来越多的问题，需要引入微服务将原先架构解耦为一个个模块。每个服务模块放在不同的服务器上，能够保证系统在高并发环境下的正常运转。
-
-各个服务模块之间如何相互调用，就使用到了RPC协议的思想（远程调用）。
-
-### **RPC介绍**
-
-#### **概念**
+## RPC介绍与应用
 
 1. RPC（Remote Procedure Call Protocol） 远程过程调用协议。
 2. RPC是一种通过网络从远程计算机程序上请求服务，不需要了解底层网络技术的协议。
 3. RPC主要作用就是不同的服务间方法调用就像本地调用一样便捷。
 
-#### **常用RPC技术或框架**
+4. 服务化：微服务化，跨平台的服务之间远程调用；
+5. 分布式系统架构：分布式服务跨机器进行远程调用；
+6. 服务可重用：开发一个公共能力服务，供多个服务远程调用。
+7. 系统间交互调用：两台服务器A、B，服务器A上的应用a需要调用服务器B上的应用b提供的方法，而应用a和应用b不在一个内存空间，不能直接调用，此时，需要通过网络传输来表达需要调用的语义及传输调用的数据。
+
+## **常用RPC技术或者框架**
 
 - 应用级的服务框架：阿里的 Dubbo/Dubbox、Google gRPC、Spring Boot/Spring Cloud。
 - 远程通信协议：RMI、Socket、SOAP(HTTP XML)、REST(HTTP JSON)。
 - 通信框架：MINA 和 Netty
 
-#### **为什么要有RPC？**
+### Dubbo
 
-1. 服务化：微服务化，跨平台的服务之间远程调用；
-2. 分布式系统架构：分布式服务跨机器进行远程调用；
-3. 服务可重用：开发一个公共能力服务，供多个服务远程调用。
-4. 系统间交互调用：两台服务器A、B，服务器A上的应用a需要调用服务器B上的应用b提供的方法，而应用a和应用b不在一个内存空间，不能直接调用，此时，需要通过网络传输来表达需要调用的语义及传输调用的数据。
+Apache Dubbo 是一款微服务框架，为大规模微服务实践提供高性能 RPC 通信、流量治理、可观测性等解决方案，涵盖 Java、Golang 等多种语言 SDK 实现
 
-### **项目目的**
+Dubbo 提供了从服务定义、服务发现、服务通信到流量管控等几乎所有的服务治理能力，支持 Triple 协议（基于 HTTP/2 之上定义的下一代 RPC 通信协议）、应用级服务发现、Dubbo Mesh （Dubbo3 赋予了很多云原生友好的新特性）等特性。
 
-仿照市场主流的RPC框架的设计思想，**使用java语言手动实现一个高性能，高可用性的RPC框架**
+Dubbo 是由阿里开源，后来加入了 Apache 。正是由于 Dubbo 的出现，才使得越来越多的公司开始使用以及接受分布式架构。
 
-### **技术栈**
+- Github ：https://github.com/apache/incubator-dubbo
+- 官网：https://dubbo.apache.org/zh/
 
-1. fastjson和protobuf等主流数据序列化方式
-2. 高性能网络框架netty
-3. 分布式协调应用zookeeper
-4. 负载均衡算法实现
-5. 限流算法实现
-6. 重试任务和定时任务在项目场景下的运用
-7. ...
+### Motan
 
-## **项目版本**
+Motan 更像是一个精简版的 Dubbo，可能是借鉴了 Dubbo 的思想，Motan 的设计更加精简，功能更加纯粹。
 
-项目的初始版本将基于netty和zookeeper实现一个简易rpc框架
+### gRPC
 
-后续版本 将基于初版进行各种优化，如：添加服务缓存，动态监听服务，负载均衡，服务限流，服务降级，服务熔断，超时重试等等
+gRPC 是 Google 开源的一个高性能、通用的开源 RPC 框架。其由主要面向移动应用开发并基于 HTTP/2 协议标准而设计（支持双向流、消息头压缩等功能，更加节省带宽），基于 ProtoBuf 序列化协议开发，并且支持众多开发语言。
 
-## **前置知识储备**
+**何谓 ProtoBuf？** [ProtoBuf（ Protocol Buffer）](https://github.com/protocolbuffers/protobuf) 是一种更加灵活、高效的数据格式，可用于通讯协议、数据存储等领域，基本支持所有主流编程语言且与平台无关。不过，通过 ProtoBuf 定义接口和数据类型还挺繁琐的，这是一个小问题。
 
-必须知道的：
+不得不说，gRPC 的通信层的设计还是非常优秀的，[Dubbo-go 3.0](https://dubbogo.github.io/)  的通信层改进主要借鉴了 gRPC。
 
-1. 熟练使用Java语言，了解代理模式等设计模式
-2. 计算机网络有一定基础，了解Java网络编程
+不过，gRPC 的设计导致其几乎没有服务治理能力。如果你想要解决这个问题的话，就需要依赖其他组件比如腾讯的 PolarisMesh（北极星）了。
 
-最好知道的：
+- Github：https://github.com/grpc/grpc
+- 官网：https://grpc.io/
 
-1. 数据序列化/反序列化
-2. netty，zookeeper的基本使用
+### Thrift
 
-## **你的收获**
+Apache Thrift 是 Facebook 开源的跨语言的 RPC 通信框架，目前已经捐献给 Apache 基金会管理，由于其跨语言特性和出色的性能，在很多互联网公司得到应用，有能力的公司甚至会基于 thrift 研发一套分布式服务框架，增加诸如服务注册、服务发现等功能。
 
-1. 了解高性能网络框架netty的基本使用和应用场景
-2. 对分布式协调应用zookeeper的机制和使用场景有深刻的认识
-3. 理解负载均衡的含义，原理以及算法实现
-4. 理解服务限流的场景及相关算法实现
-5. 手动实现超时重传，降级，熔断等功能，对微服务有进一步的认识
-6. ...（待更新）
+`Thrift`支持多种不同的**编程语言**，包括`C++`、`Java`、`Python`、`PHP`、`Ruby`等（相比于 gRPC 支持的语言更多 ）。
 
-下面推荐一些学习资料:
+- 官网：https://thrift.apache.org/
+- Thrift 简单介绍：https://www.jianshu.com/p/8f25d057a5a9
 
-[简易rpc框架的实现](https://github.com/he2121/MyRPCFromZero/blob/master/README.md)
+### 总结
 
-[rpc设计思路](https://blog.csdn.net/hfut_zhanghu/category_11148154.html)
+gRPC 和 Thrift 虽然支持跨语言的 RPC 调用，但是它们只提供了最基本的 RPC 框架功能，缺乏一系列配套的服务化组件和服务治理功能的支撑。
 
-[zookeeper教程](https://www.bilibili.com/video/BV1M741137qY/?spm_id_from=333.337.search-card.all.click&vd_source=f3cd8a8976c5f162c97de7db7c7f4393)
+Dubbo 不论是从功能完善程度、生态系统还是社区活跃度来说都是最优秀的。而且，Dubbo在国内有很多成功的案例比如当当网、滴滴等等，是一款经得起生产考验的成熟稳定的 RPC 框架。最重要的是你还能找到非常多的 Dubbo 参考资料，学习成本相对也较低。
 
-[常见的服务限流算法原理](https://javaguide.cn/high-availability/limit-request.html)
+Dubbo 和 Motan 主要是给 Java 语言使用。虽然，Dubbo 和 Motan 目前也能兼容部分语言，但是不太推荐。如果需要跨多种语言调用的话，可以考虑使用 gRPC。
 
-## **项目架构和流程图**
+## 项目架构图和流程图
 
-项目的架构图如下
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241019200220112.png" alt="image-20241019200220112" style="zoom: 50%;" />
 
-![image-20241005111855092](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005111855092.png)
+1. 客户端发起请求
+2. 客户端根据服务地址通过Netty客户端API**创建一个客户端Channel，并连接到服务端的指定端口。**
+3. 客户端**将RPC调用信息（如方法名、参数等）封装成请求消息**，并通过Netty的编码器（Encoder）将请求消息序列化成字节流。
+4. 客户端将**序列化后的字节流通过网络发送给服务端。**
+5. **服务端接收请求并处理**
+6. 服**务端通过Netty服务端API监听指定端口，等待客户端的连接请求。**
+7. 当接收到客户端的连接请求时，服务端通过Netty的解码器（Decoder）将接收到的字节流反序列化成请求消息。
+8. 服务端根据请求消息中的方法名和参数等信息，通过反射调用本地服务实现，并将执行结果封装成响应消息。
+9. 服务端通过Netty的编码器将响应消息序列化成字节流，并通过网络发送给客户端。
+10. 客户端接收响应
+11. 客户端接收到服务端的响应字节流后，通过Netty的解码器将字节流反序列化成响应消息。
+12. 客户端根据响应消息中的结果信息，进行相应的业务处理。
 
-我会在每一次的版本中画出当前的架构流程图，各位可以通过对比了解各功能的实现位置。
 
-## **简历写法**
 
-请君注意：Java方向选手一定看过不少带有rpc的简历，写法如出一辙，重复性都很高。这是因为大部分人的rpc框架都是只**实现了最基本的模型**，没有对后续的功能**进行思考和优化**。这样的项目写进简历没有亮点，面试官也抓不住想问的点。所以，我们要将写简历的重点放在【优化】上。
+## 如何实现一个基本的rpc调用？
 
-给出我的简历写法，仅供参考：
-
-**项目描述：** 
-
-基于java语言实现**分布式场景**下本地服务在RPC节点上的注册、发布与远程调用功能，并针对各种场景进行了思考和优化。 
-
-**主要工作：** 
-
-1. 实现自定义通信协议，解决**沾包**问题；自定义编/解码器和序列化器，实现java原生和fastjson，protobuf数据序列化方式； 
-2. 使用高性能网络框架**Netty**实现NIO网络通信，消费端采用 Netty 方式，会复用 Channel 避免多次连接，提高性能； 
-3. 使用分布式协调应用**Zookeeper**作为注册中心和配置中心；在客户端**建立缓存**，避免频繁访问注册中心；使用**Watcher监** **听**zookeeper节点变化，根据event事件类型**动态更新本地缓存；** 
-4. 为客户端提供**4种负载均衡**策略选择：服务轮询、随机访问、LRU最近最少使用和一致性哈希算法； 
-5. 使用Guava-Retry框架实现对白名单上幂等性服务进行**超时重试机制**，指定重试策略； 
-6. 在服务端实现服务降级：**故障降级，**故障一定次数会通知注册中心下线节点；**限流降级**，使用令牌桶算法实现接口限流 
-7. 服务端**设置熔断器**，监测服务调用情况进行3种状态的切换，从而实现**熔断保护**；对已下线的节点进行定时探测，保证容错性
-
-**个人收获：** 
-
-1. 学习了分布式网络通信RPC架构的设计原理，注册中心，本地缓存，负载均衡，服务降级，降级熔断等设计思想 
-2. 了解了netty框架的相关基本操作，对其在网络通信方面的优势有了一定理解 
-3. 了解了zookeeper的使用，以及其在项目中的应用场景；利用zookeeper的事件监听和配置中心机制对框架进行一定优化
-
-# Java手写RPC框架系列-02-第一版
-
-**运行顺序：**
-
-先运行TestServer ,再运行TestClient
-
-若用到zookeeper，先配置环境和运行zookeeper，再进行上面的操作
-
-**食用说明：**
-
-1.最好自己跟着敲一遍
-
-2.因为篇幅原因，我将重点放在了优化的过程上，一些代码说明会有省略，请大家参考仓库中代码进行学习
-
-3.最好先写一个netty的启动demo
-
-## part1 实现一个基本的rpc调用
+### :star: 基本过程
 
 假设A，B位于不同的服务器，A 想远程调用 B的xxx方法，该通过什么方式来完成这一操作呢
 
-![image-20241005112106108](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112106108.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241005112106108-1729339449578-42.png" alt="image-20241005112106108" style="zoom: 50%;" />
 
-例如：
-
-有以下这样一个场景：
-
-**服务端B：**
-
-有一个用户表
+**服务端B：**有一个用户表
 
 1. UserService 里有一个功能： getUserByUserId(Integer id)
 
@@ -156,19 +99,57 @@
 
 调用getUserByUserId方法， 内部传一个Id给服务端，服务端查询到User对象返回给客户端
 
-如何实现以上调用过程呢？
-
-我们可以从以下几个方面来思考：
-
 - **客户端A怎么实现：**
   - 调用getUserByUserId方法时，内部将调用信息处理后发送给服务端B，告诉B我要获取User
-  - 外部调用方法，内部进行其它的处理——这种场景我们可以使用动态代理的方式，改写原本方法的处理逻辑（比如，当我们正常调用getUserByUserId方法，代码逻辑是去数据库中找user，但是在当前远程调用的场景下肯定不能走这样的逻辑；我们**通过动态代理的方式，绕过【去数据库查询】这原始的逻辑，改成封装信息发送到B中请求调用服务）**
+  - 外部调用方法，内部进行其它的处理——这种场景我们可以使用动态代理的方式，改写原本方法的处理逻辑
+    （比如，当我们正常调用getUserByUserId方法，代码逻辑是去数据库中找user，但是在当前远程调用的场景下肯定不能走这样的逻辑；
+    我们**通过动态代理的方式，绕过【去数据库查询】这原始的逻辑，改成封装信息发送到B中请求调用服务）**
 - **服务端B怎么实现：**
   - 监听到A的请求后，接收A的调用信息，并根据信息得到A想调用的服务与方法
   - 根据信息找到对应的服务，进行调用后将结果发送回给A
 - **A与B之间怎么通信：**
   - 使用Java的socket网络编程进行通信
   - 为了方便A ，B之间对接收的消息进行处理，我们需要将请求信息和返回信息封装成统一的消息格式
+
+### 1. 代理模式
+
+#### 静态代理
+
+静态代理中，我们对目标对象的每个方法的增强都是手动完成的，非常不灵活
+（*比如接口一旦新增加方法，目标对象和代理对象都要进行修改*）且麻烦(*需要对每个目标类都单独写一个代理类*)。
+
+静态代理实现步骤:
+
+- 定义一个接口及其实现类；
+- 创建一个代理类同样实现这个接口
+- 将目标对象注入进代理类，然后在代理类的对应方法调用目标类中的对应方法。这样的话，我们就可以通过代理类屏蔽对目标对象的访问，并且可以在目标方法执行前后做一些自己想做的事情。
+
+#### 动态代理
+
+动态代理的实现方式有两种，比如 **JDK 动态代理**、**CGLIB** **动态代理**等等。
+
+##### JDK 动态代理机制
+
+JDK 动态代理类使用步骤：
+
+- 定义一个接口及其实现类；
+- 自定义 `InvocationHandler` 并重写`invoke`方法，在 `invoke` 方法中我们会调用原生方法（被代理类的方法）并自定义一些处理逻辑；
+- 通过 `Proxy.newProxyInstance(ClassLoader loader,Class<?>[] interfaces,InvocationHandler h)` 方法创建代理对象；
+
+##### CGLIB 动态代理机制
+
+CGLIB 动态代理类使用步骤：
+
+- 定义一个类；
+- 自定义 `MethodInterceptor` 并重写 `intercept` 方法，`intercept` 用于拦截增强被代理类的方法，和 JDK 动态代理中的 `invoke` 方法类似；
+- 通过 `Enhancer` 类的 `create()`创建代理类；
+
+#### 两种方式对比
+
+- **JDK** **动态代理只能只能代理实现了接口的类，而** **CGLIB** **可以代理未实现任何接口的类。** 另外， CGLIB 动态代理是通过生成一个被代理类的子类来拦截被代理类的方法调用，因此不能代理声明为 final 类型的类和方法。
+- 大部分情况都是 JDK 动态代理效率更优秀。
+
+
 
 ### 定义消息格式
 
@@ -215,9 +196,9 @@ public class RpcResponse implements Serializable {
 }
 ```
 
-客户端实现
+### 客户端实现
 
-![image-20241005112117851](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112117851.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241019204113752.png" alt="image-20241019204113752" style="zoom: 33%;" />
 
 **客户端通过获取ClientProxy的代理对象，通过代理对象调用方法，获取结果**
 
@@ -299,7 +280,7 @@ public class IOClient {
 
 ### 服务端实现
 
-![image-20241005112124783](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112124783.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241019204134085.png" alt="image-20241019204134085" style="zoom:33%;" />
 
 定义服务端Server的接口，指定方法
 
@@ -418,25 +399,17 @@ public class ServiceProvider {
 
 服务端在指定端口上进行监听 ，客户端向指定端口发送信息
 
-使用socket创建流进行网络传输，详见github
+使用socket创建流进行网络传输
 
-### part1架构图
+## Netty框架的引入
 
-![image-20241005112135892](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112135892.png)
-
-## part2 引入netty框架
-
-在客户端与服务端进行网络传输，采用Java原生的socket编程方式，效率低
-
-引入`netty`高性能网络框架，进行优化
+在客户端与服务端进行网络传输，采用Java原生的socket编程方式，效率低。引入`netty`高性能网络框架，进行优化
 
 netty和传统socket编程相比有哪些优势
 
 - **io传输由BIO ->NIO模式；底层 池化技术复用资源**
 - **可以自主编写 编码/解码器，序列化器等等，可拓展性和灵活性高**
 - **支持TCP,UDP多种传输协议；支持堵塞返回和异步返回**
-
-[netty知识点]  https://blog.csdn.net/qq_35190492/article/details/113174359?spm=1001.2014.3001.5506 
 
 **引入netty，就是在part1中的【信息传输部分】进行代码的重构**
 
@@ -450,6 +423,17 @@ netty和传统socket编程相比有哪些优势
     <scope>compile</scope>
 </dependency>
 ```
+
+### :star: 基本过程
+
+1. 客户端
+   1. 配置netty对**消息的处理机制**，指定编码器、解码器、消息格式、消息长度等解决粘包问题，然后指定对接收消息的处理handler
+   2. 配置NettyClientHandler，指定对接收消息的处理方式
+2. 服务端
+   1. NettyRPCServerHandler类，接收来自客户端的信息，并解析调用
+3. **客户端调用RpcClient.sendRequest方法 --->NettyClientInitializer-->Encoder编码 --->发送**
+4. **服务端RpcServer接收--->NettyServerInitializer-->Decoder解码--->NettyRPCServerHandler ---->getResponse调用---> 返回结果**
+5. **客户端接收--->NettyServerInitializer-->Decoder解码--->NettyRPCServerHandler处理结果并返回给上层**
 
 ### 客户端重构
 
@@ -690,7 +674,7 @@ public class NettyRPCServerHandler extends SimpleChannelInboundHandler<RpcReques
 
 ### netty执行流程
 
-![image-20241005112154217](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112154217.png)
+![image-20241005112154217](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241005112154217-1729339753861-46.png)
 
 具体到类是
 
@@ -698,11 +682,483 @@ public class NettyRPCServerHandler extends SimpleChannelInboundHandler<RpcReques
 - **服务端RpcServer接收--->NettyServerInitializer-->Decoder解码--->NettyRPCServerHandler ---->getResponse调用---> 返回结果**
 - **客户端接收--->NettyServerInitializer-->Decoder解码--->NettyRPCServerHandler处理结果并返回给上层**
 
-## part3 引入zookeeper作为注册中心
+
+
+### **1.netty传输位于网络结构模型中的哪一层？**
+
+**传输层**
+
+Netty支持TCP和UDP等传输层协议，通过对这些协议的封装和抽象，Netty能够处理传输层的数据传输任务，如建立连接、数据传输和连接关闭等。
+
+Netty的EventLoop和EventLoopGroup等组件基于Java NIO的多路复用器（Selector），实现了高效的IO事件处理机制，这在一定程度上与传输层的数据传输和事件处理机制相呼应。
+
+**应用层**
+
+Netty提供了丰富的协议支持，如HTTP、WebSocket、SSL、Protobuf等，这些协议主要工作在应用层。Netty通过编解码器等组件，能够方便地在应用层对数据进行编解码，从而实现与应用层协议的交互。
+
+Netty的ChannelPipeline和ChannelHandler等组件构成了一个灵活的事件处理链，允许开发者在应用层自定义各种事件处理逻辑，如身份验证、消息加密、业务逻辑处理等。
+
+### **2.讲一讲netty在你项目中的作用和执行流程？**
+
+**作用**：引用高性能网络框架netty，实现了高效的信息传输；抽象了Java NIO底层的复杂性，提供了简单易用的API，简化了网络编程；提供各种组件方便网络数据的处理
+
+**执行流程：**
+
+1. 客户端发起请求
+2. 客户端根据服务地址通过Netty客户端API**创建一个客户端Channel，并连接到服务端的指定端口。**
+3. 客户端**将RPC调用信息（如方法名、参数等）封装成请求消息**，并通过Netty的编码器（Encoder）将请求消息序列化成字节流。
+4. 客户端将**序列化后的字节流通过网络发送给服务端。**
+5. **服务端接收请求并处理**
+6. 服**务端通过Netty服务端API监听指定端口，等待客户端的连接请求。**
+7. 当接收到客户端的连接请求时，服务端通过Netty的解码器（Decoder）将接收到的字节流反序列化成请求消息。
+8. 服务端根据请求消息中的方法名和参数等信息，通过反射调用本地服务实现，并将执行结果封装成响应消息。
+9. 服务端通过Netty的编码器将响应消息序列化成字节流，并通过网络发送给客户端。
+10. 客户端接收响应
+11. 客户端接收到服务端的响应字节流后，通过Netty的解码器将字节流反序列化成响应消息。
+12. 客户端根据响应消息中的结果信息，进行相应的业务处理。
+
+### 3. 在RPC框架中如何处理异步调用？
+
+Netty通过Channel和ChannelFuture来支持异步调用。**客户端发送请求后，会得到一个ChannelFuture对象，可以注册监听器来处理响应结果。**
+
+### 4. Netty是怎么实现长连接的
+
+在 Netty 中实现长连接（Long-Lived Connection）主要是通过以下几个方面来实现的：
+
+1. 异步非阻塞 IO
+
+Netty 基于 NIO（Non-blocking I/O）模型，使用异步非阻塞的方式处理网络通信。这意味着当一个连接建立后，Netty 会将读写操作放入事件循环（EventLoop）中处理，而不是直接阻塞当前线程。这样，即使在网络流量较大时，也能有效地利用线程资源。
+
+2. 心跳机制
+
+为了维持长连接的有效性，Netty 支持心跳机制（Heartbeat）。心跳机制通过定期发送心跳包来检测连接是否仍然活跃。如果一段时间内没有数据交换，心跳机制可以帮助检测连接是否正常，从而避免无效连接占用资源。
+
+3. 连接池
+
+虽然 Netty 本身并不是一个连接池框架，但它可以很容易地与连接池一起工作。连接池可以复用已经建立的连接，避免频繁地建立和销毁连接带来的性能损耗。Netty 的连接通常会在首次建立后一直保持活跃状态，直到显式关闭或达到生命周期的终点。
+
+4. 生命周期管理
+
+Netty 提供了连接的生命周期管理机制，包括连接的建立、激活、去激活和关闭等阶段。通过这些阶段，可以方便地进行连接状态的监控和管理。
+
+5. 优雅关闭
+
+Netty 支持优雅地关闭连接，这通常通过 ChannelFutureListener 的 onCloseComplete 方法来实现。当一个连接不再需要时，可以通过 ChannelFuture 的 sync() 方法等待关闭操作完成，确保所有相关资源都被正确释放。
+
+6. ChannelHandler
+
+Netty 的 ChannelHandler 机制使得开发者可以方便地添加自定义处理逻辑来处理连接相关的事件，如连接建立、数据接收、异常处理等。这些处理逻辑可以帮助维护长连接的稳定性和有效性。
+
+### 5. 为什么用Netty？Netty和Scoket的区别
+
+**socket**
+
+Socket编程主要涉及到客户端和服务端两个方面，
+首先是在服务器端创建一个服务器套接字(ServerSocket)，并把它附加到一个端口上，服务器从这个端口监听连接。
+
+客户端请求与服务器进行连接的时候，根据服务器的域名或者IP地址，加上端口号，打开一个套接字。当服务器接受连接后，服务器和客户端之间的通信就像输入输出流一样进行操作。
+
+**缺点**
+
+1. 需对传输的数据进行解析，转化成应用级的数据
+2. 对开发人员的开发水平要求高
+3. 相对于Http协议传输，增加了开发量
+
+**Netty**
+
+写入和 ChannelHandler 绑定的 ChannelHandlerContext 中，消息从 ChannelPipeline 中的下一个ChannelHandler 中移动
+
+
+
+## Netty
+
+### redis，nginx，netty 是依赖什么做的这么高性能？（多Reactor多进程、单Reactor单进程 Reactor）
+
+主要是依赖**Reactor 模式**，也就是来了一个事件，Reactor 就有相对应的反应/响应
+
+- Reactor 负责监听和分发事件，事件类型包含连接事件、读写事件
+- 处理资源池负责处理事件，如 read -> 业务逻辑 -> send
+
+**Redis**
+
+![image-20241020175102710](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241020175102710.png)
+
+Redis 是由 C 语言实现的，在 Redis 6.0 版本之前采用的正是「单 Reactor 单进程」的方案
+
+- Reactor 对象通过 select （IO 多路复用接口） 监听事件，收到事件后通过 dispatch 进行分发，具体分发给 Acceptor 对象还是 Handler 对象，还要看收到的事件类型
+- 如果是连接建立的事件，则交由 Acceptor 对象进行处理，Acceptor 对象会通过 accept 方法 获取连接，并创建一个 Handler 对象来处理后续的响应事件
+- 如果不是连接建立事件， 则交由当前连接对应的 Handler 对象来进行响应
+- Handler 对象通过 read -> 业务处理 -> send 的流程来完成完整的业务流程
+
+存在缺点：
+
+- 第一个缺点，因为只有一个进程，无法充分利用 多核 CPU 的性能
+- 第二个缺点，Handler 对象在业务处理时，整个进程是无法处理其他连接的事件的，如果业务处理耗时比较长，那么就造成响应的延迟
+
+**nginx** 
+
+nginx是多 Reactor 多进程方案，不过方案与标准的多 Reactor 多进程有些差异
+
+具体差异表现在主进程中仅仅用来初始化 socket，并没有创建 mainReactor 来 accept 连接，而是由子进程的 Reactor 来 accept 连接
+
+**Netty**
+
+![image-20241020175710105](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241020175710105.png)
+
+- 主线程中的 MainReactor 对象通过 select 监控连接建立事件，收到事件后通过 Acceptor 对象中的 accept 获取连接，将新的连接分配给某个子线程
+- 子线程中的 SubReactor 对象将 MainReactor 对象分配的连接加入 select 继续进行监听，并创建一个 Handler 用于处理连接的响应事件
+- 如果有新的事件发生时，SubReactor 对象会调用当前连接对应的 Handler 对象来进行响应
+- Handler 对象通过 read -> 业务处理 -> send 的流程来完成完整的业务流程。
+
+优势：
+
+- 主线程和子线程分工明确，主线程只负责接收新连接，子线程负责完成后续的业务处理
+- 主线程和子线程的交互很简单，主线程只需要把新连接传给子线程，子线程无须返回数据，直接就可以在子线程将处理结果发送给客户端
+
+### Netty是什么
+
+1. Netty 是⼀个 **基于 NIO** 的 client-server(客户端服务器)框架，使⽤它可以快速简单地开发⽹络应⽤程序。
+2. 它极⼤地简化并优化了 TCP 和 UDP 套接字服务器等⽹络编程,并且性能以及安全性等很多⽅⾯甚⾄都要更好。
+
+### BIO,NIO 和 AIO？（阻塞IO/非阻塞IO）
+
+- **BIO：** 同步阻塞 I/O 模式，数据的读取写⼊必须阻塞在⼀个线程内等待其完成
+- **NIO**：同步⾮阻塞的 I/O 模型，线程不断地轮询调用 `read` 操作来判断是否有数据，提供了 Channel , Selector ， Buffer等抽象
+- **AIO**：异步⾮阻塞的 IO 模型，当后台处理完成，操作系统会通知相应的线程进⾏后续的操作
+
+### 直接用 NIO和用 Netty？（Netty的优势）
+
+对编程功底要求⽐较⾼，⽽且，NIO 在⾯对断连重连、包丢失、粘包等问题时处理过程⾮常复杂。Netty相对来说有这些优势
+
+- 统⼀的 API，⽀持多种传输类型，阻塞和⾮阻塞的
+- 简单⽽强⼤的线程模型
+- ⾃带编解码器解决 TCP 粘包/拆包问题
+- 安全性不错，有完整的 SSL/TLS 以及 StartTLS ⽀持
+- ⽐直接使⽤ Java 核⼼ API 有更⾼的吞吐量、更低的延迟、更低的资源消耗和更少的内存复制
+
+### Netty 应用场景？
+
+Netty 主要⽤来做**⽹络通信**：
+
+1. **作为 RPC 框架的⽹络通信⼯具**：⽐如我调⽤另外⼀个节点的⽅法的话，⾄少是要让对知道我调⽤的是哪个类中的哪个⽅法以及相关参数吧
+2. 可以聊天类似微信的即时通讯系统
+3. **实现消息推送系统**：比如市面上的像Nacos，RocketMQ、Dubbo
+
+### Netty 的核心组件？
+
+ **Selector**
+
+Netty 基于 **Selector 对象实现 I/O 多路复用**，通过 Selector **一个线程可以监听多个连接的 Channel 事件**。 当向一个 **Selector 中注册 Channel 后**，Selector 内部的机制就可以**自动不断地查询（Select）\**这些注册的 Channel 是否\**有已就绪的 I/O 事件**（例如可读，可写，网络连接完成等），这样程序就可以很简单地使用一个线程高效地管理多个 Channel。
+
+**Bytebuf（字节容器）**
+
+⽹络通信最终都是通过字节流进⾏传输的。 `ByteBuf` 就是 Netty 提供的⼀个字节容器，其内部是⼀个字节数组。 当我们通过 Netty 传输数据的时候，就是通过 `ByteBuf `进⾏的，可以将 `ByteBuf `看作是 Netty 对 `ByteBuffer` 字节容器的封装和抽象
+
+**Bootstrap 和 ServerBootstrap（启动引导类）**
+
+1. `Bootstrap` 通常使⽤ `connect()` ⽅法连接到远程的主机和端⼝，作为⼀个 Netty TCP 协议通信中的客户端
+2. `ServerBootstrap` 通常使⽤ `bind()` ⽅法绑定本地的端⼝上，然后等待客户端的连接
+3. `Bootstrap` 只需要配置⼀个线程组 `EventLoopGroup` ,⽽ `ServerBootstrap` 需要配置两个线程组`EventLoopGroup` ，⼀个⽤于接收连接，⼀个⽤于具体的 IO 处理。第一个EventLoopGroup通常只有一个EventLoop，通常叫做bossGroup，负责客户端的连接请求
+
+**Channel（⽹络操作抽象类）**
+
+`Channel` 接⼝是 Netty 对⽹络操作抽象类。通过 `Channel` 我们可以进⾏ I/O 操作。
+
+**EventLoop（事件循环）**
+
+`EventLoop`的主要作⽤实际就是责监听⽹络事件并调⽤事件处理器进⾏相关 I/O 操作（读写）的处理
+
+![image-20241020175726559](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241020175726559.png)
+
+**ChannelHandler（消息处理器） 和 ChannelPipeline（ChannelHandler 对象链表）**
+
+`ChannelHandler`是消息的具体处理器，主要负责处理客户端/服务端接收和发送的数据，当`Channel` 被创建时，它会被⾃动地分配到它专属的 `ChannelPipeline`
+
+ 当`ChannelHandler` 被添加到的 `ChannelPipeline` 它得到⼀个 `ChannelHandlerContext` ，它代表⼀个` ChannelHandler` 和 `ChannelPipeline` 之间的"绑定"
+
+**ChannelFuture（操作执⾏结果）**
+
+Netty 中所有的 I/O 操作都为异步的，我们不能⽴刻得到操作是否执⾏成功
+
+可以通过 `ChannelFuture` 接⼝的 `addListener()` ⽅法注册⼀个` ChannelFutureListener `，当操作执⾏成功或者失败时，监听就会⾃动触发返回结果
+
+### Netty-`NioEventLoopGroup` 默认的构造函数会起多少线程呢？
+
+`NioEventLoopGroup` 默认的构造函数实际会起的线程数为 `CPU核⼼数*2`
+
+### `Reactor`/`Proactor`(非阻塞同步网络模式/异步网络模式)
+
+![image-20241020175746722](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241020175746722.png)
+
+- Reactor 是非阻塞同步网络模式，感知的是就绪可读写事件。
+- Proactor 是异步网络模式， 感知的是已完成的读写事件
+
+Reactor 可以理解为「来了事件操作系统通知应用进程，让应用进程来处理」，而 Proactor 可以理解为「来了事件操作系统来处理，处理完再通知应用进程」
+
+### 主从多线程 Reactor
+
+⼀组 NIO 线程负责接受请求，⼀组 NIO 线程处理 IO 操作
+
+### Netty 线程模型？
+
+Netty 主要靠 `NioEventLoopGroup` 线程池来实现具体的线程模型的
+
+实现服务端的时候，⼀般会初始化两个线程组：
+
+- `bossGroup`：接收连接
+- `workerGroup`：负责具体的处理，交由对应的 `Handler` 处理
+
+单线程模型：`eventGroup`既用于处理客户端连接，又负责具体的处理
+
+单线程模型：⼀个 Acceptor 线程只负责监听客户端的连接，⼀个 NIO 线程池负责具体处理
+
+主从多线程模型：从⼀个 主线程 NIO 线程池中选择⼀个线程作为 `Acceptor` 线程，绑定监听端⼝，接收客户端连接的连接，其他线程负责后续的接⼊认证等⼯作。连接建⽴完成后`SubNIO `线程池负责具体处理 I/O 读写
+
+### Netty 服务端和客户端的启动过程？（Netty启动过程）
+
+**服务端**
+
+1. 创建了两个 `NioEventLoopGroup` 对象实例： `bossGroup` 和 `workerGroup`
+2. 创建了⼀个服务端启动引导类： `ServerBootstrap`
+3. 通过 `.group()` ⽅法给引导类 `ServerBootstrap` 配置两⼤线程组，确定了线程模型
+4. 通过 `channel()` ⽅法给引导类 `ServerBootstrap` 指定了 IO 模型为 NIO
+5. `bind()`绑定端口
+
+**客户端**
+
+1. 创建⼀个 `NioEventLoopGroup `对象实例
+2. 创建客户端启动的引导类是 `Bootstrap`
+3. 通过 `.group() `⽅法给引导类 `Bootstrap` 配置⼀个线程组
+4. 通过` channel()` ⽅法给引导类 `Bootstrap` 指定了 IO 模型为 NIO
+5. 通过 `.childHandler()` 给引导类创建⼀个 `ChannelInitializer` ，然后指定了客户端消息的业务处理逻辑 `HelloClientHandler` 对象
+6. 调⽤ `Bootstrap` 类的 `connect()` ⽅法设定好ip和端口进⾏连接
+
+### Netty 长连接、心跳机制了解么?
+
+**TCP长连接和短链接**
+
+TCP 在进行读写之前，`server` 与 `client`之间必须提前建立一个连接。建立连接的过程，需要三次握手，释放/关闭连接的话需要四次挥手。这个过程是比较消耗网络资源并且有时间延迟的。
+
+所谓，短连接说的就是 `server` 端 与 `client `端建立连接之后，读写完成之后就关闭掉连接，如果下一次再要互相发送消息，就要重新连接。短连接的优点很明显，就是管理和实现都比较简单，缺点也很明显，每一次的读写都要建立连接必然会带来大量网络资源的消耗，并且连接的建立也需要耗费时间。
+
+长连接说的就是 `client` 向 `server` 双方建立连接之后，即使 `client`与`server` 完成一次读写，它们之间的连接并不会主动关闭，后续的读写操作会继续使用这个连接。长连接的可以省去较多的TCP 建立和关闭的操作，降低对网络资源的依赖，节约时间。对于频繁请求资源的客户来说，非常适用长连接。
+
+**为什么需要心跳机制，Netty中心跳机制了解吗**
+
+在 TCP 保持长连接的过程中，可能会出现断网等网络异常出现，异常发生的时候， `client`与`server` 之间如果没有交互的话，它们是无法发现对方已经掉线的。为了解决这个问题，我们就需要引入心跳机制。
+
+心跳机制的工作原理是：在 `client` 与 `server` 之间在一定时间内没有数据交互时，即处于 `idle` 状态时，客户端或服务器就会发送一个特殊的数据包给对方，当接收方收到这个数据报文后，也立即发送一个特殊的数据报文，回应发送方，此即一个 `PING-PONG` 交互。所以，当某一端收到心跳消息后，就知道了对方仍然在线，这就确保 TCP连接的有效性。
+
+TCP 实际上自带的就有长连接选项，本身是也有心跳包机制，也就是TCP的选项：`SO_KEEPALIVE`。但是，TCP 协议层面的长连接灵活性不够。所以，一般情况下我们都是在应用层协议上实现自定义心跳机制的，也就是在 Netty 层面通过编码实现。通过 Netty 实现心跳机制的话，核心类是 `IdleStateHandler`
+
+### Netty-零拷贝
+
+Netty 中的零拷贝与操作系统层面上的不太一样，操作系统通过mmap或者sendfile来实现，Netty的零拷贝完全是在用户态层面的，他更偏向于优化数据操作这样的概念
+
+- Netty 提供了 `CompositeByteBuf` 类，它可以将多个 ByteBuf 合并为一个逻辑上的 ByteBuf，避免了各个 ByteBuf 之间的拷贝
+- 通过 wrap 操作，我们可以将 byte[] 数组、ByteBuf、ByteBuffer等包装成一个 Netty ByteBuf 对象，进而避免了拷贝操作
+- ByteBuf 支持 slice 操作，因此可以将 ByteBuf 分解为多个共享同一个存储区域的 ByteBuf，避免了内存的拷贝
+- 通过 `FileRegion` 包装的`FileChannel.tranferTo` 实现文件传输，可以直接将文件缓冲区的数据发送到目标 `Channel`，避免了传统通过循环 write 方式导致的内存拷贝问题
+
+## Zookeeper
+
+### 什么是Zookeeper
+
+ZooKeeper 是一个开源的**分布式协调服务**，为我们提供了高可用、高性能、稳定的分布式数据一致性解决方案，通常被用于实现诸如**数据发布/订阅、负载均衡、**命名服务、分布式协调/通知、集群管理、**Master 选举、分布式锁和分布式队列**等功能。这些功能的实现主要依赖于 ZooKeeper 提供的 **数据存储+事件监听** 功能。
+
+- 命名服务：可以通过 ZooKeeper 的顺序节点生成全局唯一 ID。
+- 数据发布/订阅：通过 Watcher 机制 可以很方便地实现数据发布/订阅。当你将数据发布到 ZooKeeper 被监听的节点上，其他机器可通过监听 ZooKeeper 上节点的变化来实现配置的动态更新。
+- 分布式锁：通过创建唯一节点获得分布式锁，当获得锁的一方执行完相关代码或者是挂掉之后就释放锁。分布式锁的实现也需要用到 Watcher 机制 ，我在 分布式锁详解 这篇文章中有详细介绍到如何基于 ZooKeeper 实现分布式锁。
+
+ZooKeeper **将数据保存在内存中，性能是不错的。 在“读”多于“写”的应用程序中尤其地高性能**，因为“写”会导致所有的服务器间同步状态。（“读”多于“写”是协调服务的典型场景）
+
+很多顶级的开源项目都用到了 ZooKeeper，比如：
+
+- **Kafka** : ZooKeeper 主要为 Kafka 提供 Broker 和 Topic 的注册以及多个 Partition 的负载均衡等功能。不过，在 Kafka 2.8 之后，引入了基于 Raft 协议的 KRaft 模式，不再依赖 Zookeeper，大大简化了 Kafka 的架构。
+- **Hbase** : ZooKeeper 为 Hbase 提供确保整个集群只有一个 Master 以及保存和提供 regionserver 状态信息（是否在线）等功能。
+- **Hadoop** : ZooKeeper 为 Namenode 提供高可用支持。
+
+### ZooKeeper特点
+
+- **顺序一致性**： 从同一客户端发起的事务请求，最终将会严格地按照顺序被应用到 ZooKeeper 中去。
+- **原子性：** 所有事务请求的处理结果**在整个集群中所有机器上的应用情况是一致的**，也就是说，要么整个集群中所有的机器都成功应用了某一个事务，要么都没有应用。
+- 单一系统映像： 无论客户端连到哪一个 ZooKeeper 服务器上，其看到的服务端数据模型都是一致的。
+- **可靠性： 一旦一次更改请求被应用，更改的结果就会被持久化**，直到被下一次更改覆盖。
+- **实时性： 一旦数据发生变更，其他节点会实时感知到**。每个客户端的系统视图都是最新的。
+- **集群部署：**3~5 台（最好奇数台）机器就可以组成一个集群，每台机器都在内存保存了 ZooKeeper 的全部数据，机器之间互相通信同步数据，客户端连接任何一台机器都可以。
+- **高可用：**如果某台机器宕机，会保证数据不丢失**。集群中挂掉不超过一半的机器，都能保证集群可用**。比如 3 台机器可以挂 1 台，5 台机器可以挂 2 台
+
+### -----Zookeeper重要概念------
+
+### 1. Datamodel数据模型
+
+**ZooKeeper 数据模型采用层次化的多叉树形结构，每个节点上都可以存储数据，**这些数据可以是数字、字符串或者是二进制序列。并且。每个节点还可以拥有 N 个子节点，最上层是根节点以“/”来代表。每个数据节点在 ZooKeeper 中被称为 **znode**，它是 ZooKeeper 中数据的最小单元。并且，每个 znode 都有一个唯一的路径标识。
+
+强调一句：**ZooKeeper 主要是用来协调服务的，而不是用来存储业务数据的，所以不要放比较大的数据在 znode 上，ZooKeeper 给出的每个节点的数据大小上限是 1M 。**
+
+### 2. znode数据节点
+
+我们通常是将 znode 分为 4 大类：
+
+- **持久（PERSISTENT）节点**：一旦创建就一直存在即使 ZooKeeper 集群宕机，直到将其删除。
+- **临时（EPHEMERAL）节点**：临时节点的生命周期是与 **客户端会话（session）** 绑定的，**会话消失则节点消失**。并且，**临时节点只能做叶子节点** ，不能创建子节点。
+- **持久顺序（PERSISTENT_SEQUENTIAL）节点**：除了具有持久（PERSISTENT）节点的特性之外， 子节点的名称还具有顺序性。比如 `/node1/app0000000001`、`/node1/app0000000002` 。
+- **临时顺序（EPHEMERAL_SEQUENTIAL）节点**：除了具备临时（EPHEMERAL）节点的特性之外，子节点的名称还具有顺序性
+
+每个 znode 由 2 部分组成:
+
+- **stat**：状态信息
+- **data**：节点存放的数据的具体内容
+
+通过 get 命令来获取 根目录下的 dubbo 节点的内容
+
+Stat 类中包含了一个数据节点的所有状态信息的字段**，包括事务 ID（cZxid）、节点创建时间（ctime） 和子节点个数（numChildren） 等等。**
+
+| znode 状态信息 | 解释                                                         |
+| -------------- | ------------------------------------------------------------ |
+| cZxid          | create ZXID，即该数据节点被创建时的事务 id                   |
+| ctime          | create time，即该节点的创建时间                              |
+| mZxid          | modified ZXID，即该节点最终一次更新时的事务 id               |
+| mtime          | modified time，即该节点最后一次的更新时间                    |
+| pZxid          | 该节点的子节点列表最后一次修改时的事务 id，只有子节点列表变更才会更新 pZxid，子节点内容变更不会更新 |
+| cversion       | 子节点版本号，当前节点的子节点每次变化时值增加 1             |
+| dataVersion    | 数据节点内容版本号，节点创建时为 0，每更新一次节点内容(不管内容有无变化)该版本号的值增加 1 |
+| aclVersion     | 节点的 ACL 版本号，表示该节点 ACL 信息变更次数               |
+| ephemeralOwner | 创建该临时节点的会话的 sessionId；如果当前节点为持久节点，则 ephemeralOwner=0 |
+| dataLength     | 数据节点内容长度                                             |
+| numChildren    | 当前节点的子节点个数                                         |
+
+### 3. 版本version
+
+对应于每个 znode，ZooKeeper 都会为其维护一个叫作 Stat 的数据结构**，Stat 中记录了这个 znode 的三个相关的版本：**
+
+- dataVersion：当前 znode 节点的版本号
+- cversion：当前 znode 子节点的版本
+- aclVersion：当前 znode 的 ACL 的版本
+
+### 4. ACL权限控制
+
+ZooKeeper 采用 ACL（AccessControlLists）策略来进行权限控制，类似于 UNIX 文件系统的权限控制。
+
+对于 znode 操作的权限，ZooKeeper 提供了以下 5 种：
+
+- **CREATE** : 能创建子节点
+- **READ**：能获取节点数据和列出其子节点
+- **WRITE** : 能设置/更新节点数据
+- **DELETE** : 能删除子节点
+- **ADMIN** : 能设置节点 ACL 的权限
+
+其中尤其需要注意的是，**CREATE** 和 **DELETE** 这两种权限都是针对 **子节点** 的权限控制。
+
+对于身份认证，提供了以下几种方式：
+
+- **world**：默认方式，所有用户都可无条件访问。
+- **auth** :不使用任何 id，代表任何已认证的用户。
+- **digest** :用户名:密码认证方式：*username:password* 。
+- **ip** : 对指定 ip 进行限制
+
+### 5. Watcher事件监听器
+
+Watcher（事件监听器），是 ZooKeeper 中的一个很重要的特性。ZooKeeper 允许用户在指定节点上注册一些 Watcher，**并且在一些特定事件触发的时候，ZooKeeper 服务端会将事件通知到感兴趣的客户端上去，**该机制是 ZooKeeper 实现分布式协调服务的重要特性。
+
+![image-20241020175827979](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241020175827979.png)
+
+### 6. 会话Session
+
+**Session 可以看作是 ZooKeeper 服务器与客户端的之间的一个 TCP 长连接**，通过这个连接，**客户端能够通过心跳检测与服务器保持有效的会话，也**能够向 ZooKeeper 服**务器发送请求并接受响应**，同时还能**够通过该连接接收来自服务器的 Watcher 事件通知。**
+
+Session 有一个属性叫做：`sessionTimeout` ，`sessionTimeout` 代表会话的超时时间。当由于服务器压力太大、网络故障或是客户端主动断开连接等各种原因导致客户端连接断开时，只要在`sessionTimeout`规定的时间内能够重新连接上集群中任意一台服务器，那么之前创建的会话仍然有效。
+
+另外，在为客户端创建会话之前，服务端首先会为每个客户端都分配一个 `sessionID`。由于 `sessionID`是 ZooKeeper 会话的一个重要标识，许多与会话相关的运行机制都是基于这个 `sessionID` 的，因此，无论是哪台服务器为客户端分配的 `sessionID`，都务必保证全局唯一。
+
+### ------Zookeeper集群--------
+
+最典型集群模式**：Master/Slave 模式（主备模式）**。
+在这种模式中，**通常 Master 服务器作为主服务器提供写服务，其他的 Slave 服务器从服务器通过异步复制的方式获取 Master 服务器最新的数据提**供读服务
+
+### Zookeeper集群角色
+
+在 ZooKeeper 中没有选择传统的 Master/Slave 概念，而是引入了 L**eader、Follower 和 Observer** 三种角色
+
+|   角色   |                             说明                             |
+| :------: | :----------------------------------------------------------: |
+|  Leader  | **为客户端提供读和写的服务**，负责**投票的发起和决议**，更新系统状态。 |
+| Follower | 为客户端提供读服务，如果是写服务则转发给 Leader。参与选举过程中的投票。 |
+| Observer | 为客户端提供读服务，如果是写服务则转发给 Leader。<br />**不参与选举**过程中的投票，也**不参与“过半写成功”策略**。<br />在不影响写性能的情况下提升集群的读性能。此角色于 ZooKeeper3.3 系列新增的角色 |
+
+### Zookeeper集群Leader选举过程
+
+当 Leader 服务器出现网络中断、崩溃退出与重启等异常情况时，就会进入 Leader 选举过程，这个过程会选举产生新的 Leader 服务器。
+
+这个过程大致是这样的：
+
+1. **Leader election（选举阶段）**：节点在一开始都处于选举阶段，**只要有一个节点得到超半数节点的票数，它就可以当选准 leader。**
+2. **Discovery（发现阶段）**：在这个阶段**，followers 跟准 leader 进行通信，**同步 followers 最近接收的事务提议。
+3. **Synchronization（同步阶段）**：**同步阶段主要是利用 leader 前一阶段获得的最新提议历史，同步集群中所有的副本**。同步完成之后准 leader 才会成为真正的 leader。
+4. **Broadcast（广播阶段）**：到了这个阶段，ZooKeeper 集群才能正式对外提供事务服务，并且 leader 可以进行消息广播。同时如果有新的节点加入，还需要对新节点进行同步。
+
+ZooKeeper 集群中的服务器状态有下面几种：
+
+- **LOOKING**：寻找 Leader。
+- **LEADING**：Leader 状态，对应的节点为 Leader。
+- **FOLLOWING**：Follower 状态，对应的节点为 Follower。
+- **OBSERVING**：Observer 状态，对应节点为 Observer，该节点不参与 Leader 选举。
+
+### Zookeeper集群奇数原因
+
+ZooKeeper 集群在宕掉几个 ZooKeeper 服务器之后，**如果剩下的 ZooKeeper 服务器个数大于宕掉的个数的话整个 ZooKeeper 才依然可用。**
+假如我们的集群中有 n 台 ZooKeeper 服务器，那么也就是剩下的服务数必须大于 n/2。先说一下结论，2n 和 2n-1 的容忍度是一样的，都是 n-1，大家可以先自己仔细想一想，这应该是一个很简单的数学问题了。
+比如假如我们有 3 台，那么最大允许宕掉 1 台 ZooKeeper 服务器，如果我们有 4 台的的时候也同样只允许宕掉 1 台。
+假如我们有 5 台，那么最大允许宕掉 2 台 ZooKeeper 服务器，如果我们有 6 台的的时候也同样只允许宕掉 2 台。
+**综上，何必增加那一个不必要的 ZooKeeper 呢？**
+
+### Zookeeper选举的过半机制
+
+**何为集群脑裂？**
+对于一个集群，通常多台机器会部署在不同机房，来提高这个集群的可用性。保证可用性的同时，会发生一种机房间网络线路故障，导致机房间网络不通，而集群被割裂成几个小集群。这时候**子集群各自选主导致“脑裂”的情况。**
+举例说明：比如现在有一个由 6 台服务器所组成的一个集群，部署在了 2 个机房，每个机房 3 台。正常情况下只有 1 个 leader，但是当两个机房中间网络断开的时候，每个机房的 3 台服务器都会认为另一个机房的 3 台服务器下线，而选出自己的 leader 并对外提供服务。若没有过半机制，当网络恢复的时候会发现有 2 个 leader。仿佛是 1 个大脑（leader）分散成了 2 个大脑，这就发生了脑裂现象。脑裂期间 2 个大脑都可能对外提供了服务，这将会带来数据一致性等问题。
+**过半机制是如何防止脑裂现象产生的？**
+
+ZooKeeper 的**过半机制导致不可能产生 2 个 leader，因为少于等于一半是不可能产生 leader 的，这就使得不论机房的机器如何分配都不可能发生脑裂。**
+
+### ------ZAB协议和Paxos算法-----
+
+Paxos 算法应该可以说是 ZooKeeper 的灵魂了。**ZooKeeper 并没有完全采用 Paxos 算法 ，而是使用 ZAB 协议作为其保证数据一致性的核心算法**。ZAB 协议并不像 Paxos 算法那样，是一种通用的分布式一致性算法，它是一种特别为 Zookeeper 设计的崩溃可恢复的原子消息广播算法
+
+ZAB（ZooKeeper Atomic Broadcast，原子广播） 协议是为分布式协调服务 ZooKeeper 专门设计的一种支持崩溃恢复的原子广播协议。 在 ZooKeeper 中，主要依赖 ZAB 协议来实现分布式数据一致性，基于该协议，**ZooKeeper 实现了一种主备模式的系统架构来保持集群中各个副本之间的数据一致性**
+
+### ZAB协议的两种基本模式：崩溃恢复和消息广播
+
+ZAB 协议包括两种基本的模式，分别是
+**崩溃恢复：**当整个服务框架在启动过程中，或是当 Leader 服务器出现网络中断、崩溃退出与重启等异常情况时，ZAB 协议就会进入恢复模式并选举产生新的 Leader 服务器。当选举产生了新的 Leader 服务器，同时集群中已经有过半的机器与该 Leader 服务器完成了状态同步之后，ZAB 协议就会退出恢复模式。其中，所谓的状态同步是指数据同步，用来保证集群中存在过半的机器能够和 Leader 服务器的数据状态保持一致。
+**消息广播：**当集群中已经有过半的 Follower 服务器完成了和 Leader 服务器的状态同步，那么整个服务框架就可以进入消息广播模式了。 当一台同样遵守 ZAB 协议的服务器启动后加入到集群中时，如果此时集群中已经存在一个 Leader 服务器在负责进行消息广播，那么新加入的服务器就会自觉地进入数据恢复模式：找到 Leader 所在的服务器，并与其进行数据同步，然后一起参与到消息广播流程中去。
+
+### ------Zookeeper和ETCD-------
+
+[ETCD](https://etcd.io/) 是一种强一致性的分布式键值存储，它提供了一种可靠的方式来存储需要由分布式系统或机器集群访问的数据。ETCD 内部采用 [Raft 算法](https://javaguide.cn/distributed-system/protocol/raft-algorithm.html)作为一致性算法，基于 Go 语言实现。
+
+|             |                          ZooKeeper                           |                      ETCD                       |
+| :---------: | :----------------------------------------------------------: | :---------------------------------------------: |
+|    语言     |                             Java                             |                       Go                        |
+|    协议     |                             TCP                              |                      Grpc                       |
+|  接口调用   |                必须要使用自己的client进行调用                |  可通过Http传输，即可以通过CURL等命令进行调用   |
+| 一致性算法  |                           zab协议                            |                    Raft算法                     |
+| Watcher机制 |                    较为局限，一次性触发器                    |           一次watch可以监听所有的事件           |
+|  数据模型   |                      基于目录的层次模式                      |      参考了zk的数据模型，是个扁平的kv模型       |
+|    存储     | kv存储，使用的是ConcurrentHashMap，内存存储，一般不建议存储较多数据 | kv存储，使用bbolt存储引擎，可以处理几个gb的数据 |
+|    MVCC     |                            不支持                            |      支持，可以通过两个b+tree进行版本控制       |
+| 全局Session |                           存在缺陷                           |         实现更为灵活，避免了安全性问题          |
+|  权限校验   |                             ACL                              |                      RABC                       |
+|  事务能力   |                     提供了简易的事务能力                     |            只提供了版本号的检查能力             |
+|  部署维护   |                             复杂                             |                      简单                       |
+
+## Zookeeper注册中心的引入
 
 在**part1 和part2 中，我们在调用服务时，对目标的ip地址和端口port都是写死的，默认本机地址和9999端口号**
 
-在实际场景下，**服务的地址和端口会被记录到【注册中心】中。服务端上线时，在注册中心注册自己的服务与对应的地址，而客户端调用服务时，去注册中心根据服务名找到对应的服务端地址。**
+在实际场景下，**服务的地址和端口会被记录到【注册中心】中。**
+**服务端上线时，在注册中心注册自己的服务与对应的地址，**
+**而客户端调用服务时，去注册中心根据服务名找到对应的服务端地址。**
 
 这里我们使用zookeeper作为注册中心。
 
@@ -722,7 +1178,7 @@ public class NettyRPCServerHandler extends SimpleChannelInboundHandler<RpcReques
 
 **数据模型**：
 
-![image-20241005112202748](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112202748.png)
+![image-20241005112202748](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241005112202748-1729339946893-48.png)
 
 `zookeeper`的数据结点可以视为树状结构(或目录)，树中的各个结点被称为`znode`(即`zookeeper node`)，一个`znode`可以由多个子结点。`zookeeper`结点在结构上表现为树状；
 
@@ -737,6 +1193,15 @@ public class NettyRPCServerHandler extends SimpleChannelInboundHandler<RpcReques
 - 结点的**状态**`stat`：用来描述当前结点的创建、修改记录，包括`cZxid`、`ctime`等
 
 **应用场景**：通常作为注册中心和配置中心
+
+### :star: 基本过程
+
+1. 客户端
+   1. 与原先写死的ip和port不同，这次外界调用时直接创建ClientProxy，不用给参数。ClientProxy中也一样，去掉ip和port变量
+   2. **改为在rpcClient.sendRequest方法中，先去注册中心中查找服务对应的ip和port，再去连接对应的服务器**
+   3. 实现向注册中心中查询 服务地址的类 是实现ServiceCenter接口的ZKServiceCenter类
+2. 服务端
+   1. **在服务端上线时调用ServiceProvider的provideServiceInterface方法中添加逻辑，使得本地注册服务时也注册服务到注册中心上**
 
 ### 环境配置
 
@@ -761,7 +1226,7 @@ Curator：对zookeeper进行连接操作的工具
 
 bin目录下 1.双击zkServer.cmd 2.双击zkCli.cmd
 
-zkCli界面显示![image-20241005112236364](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112236364.png)
+zkCli界面显示![image-20241005112236364](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241005112236364-1729339946893-49.png)
 
 ### 客户端重构
 
@@ -911,9 +1376,7 @@ public class ZKServiceCenter implements ServiceCenter{
 
 ### 服务端重构
 
-服务端要改动的地方在于：注册服务
-
-还记得我们在part1中的ServiceProvider类吗，他的功能是注册服务到本地集合中
+服务端要改动的地方在于：注册服务。还记得我们在part1中的ServiceProvider类吗，他的功能是注册服务到本地集合中
 
 **我们添加一个ServiceRegister变量用于注册服务到注册中心**
 
@@ -1007,31 +1470,332 @@ public class ZKServiceRegister implements ServiceRegister {
 }
 ```
 
-### part3 架构图
+### 加入zookeeper后的架构图
 
-![image-20241005112223296](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112223296.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241019201246856.png" alt="image-20241019201246856" style="zoom: 33%;" />
 
-# Java手写RPC框架系列-03-第二版
+### **1.zookeeper在项目中的角色？你为什么使用zookeeper**
 
-这期我们实现
+1. zookeeper作为项目的注册中心，实现着服务注册，服务发现和维护服务状态的功能；
+2. zookeeper具有高可用性，一致性，有着丰富的api，应用广阔，很多大数据框架都有他的身影。
 
-**1.netty自定义编码器，解码器和序列化器，实现json，protobuf序列化方式**
+### **2.  你为什么选择Zookeeper作为注册中心呢，为什么不用Nacos**
 
-**2.在客户端建立本地服务缓存并实现动态更新**
+zookeeper 的特性就是强一致性，这个不好答，
+可以从另一个优点：成熟稳定来答。
+因为 zookeeper 是一个成熟且运用广泛的分布式应用，
+在学习中发现 目前很多大数据应用如 **kafka，hadoop，hbase **
+**都是使用 zookeeper 来协调管理服务，所以我考虑采用了 zookeeper 作为注册中心**
 
-**运行顺序：**
+### **3. 注册中心的意义？**
 
-先运行TestServer ,再运行TestClient
+①服务注册与发现：注册中心实现了微服务架构中各个微服务的服务注册与发现，这是其最基础也是最重要的功能。通过注册中心，各个微服务可以将自己的地址信息（如IP地址、端口号等）注册到中心，同时也能够从中发现其他微服务的地址信息。
 
-若用到zookeeper，先配置环境和运行zookeeper，再进行上面的操作
+②动态性：在微服务架构中，服务的数量和位置可能会频繁变化。注册中心能够动态地处理这些变化，确保服务消费者能够实时获取到最新的服务提供者信息。
 
-**食用说明：**
+③增强微服务之间的去中心化在单体项目中，模块之间的依赖关系是通过内部的直接引用来实现的。而在微服务架构中，注册中心的存在使得微服务之间的依赖关系不再是直接的函数引用，而是通过注册中心来间接调用。这种方式增强了微服务之间的去中心化，提高了系统的灵活性和可扩展性。
 
-1.最好自己跟着敲一遍
+④提升系统的可用性和容错性注册中心通常具有高可用性的设计，能够确保在部分节点故障时仍然能够正常工作。这使得整个微服务架构在面临故障时能够更加稳定地运行。
 
-2.最好先写一个zookeeper的watch机制的demo
+### 4. 服务注册到ZooKeeper的结构是怎样的？
 
-## part1 netty自定义编码器，解码器和序列化器
+1. 服务注册目录
+
+首先，需要定义一个根目录来存放所有服务的信息。这个根目录可以是任意命名，例如 `/services` 或 `/registry`。
+
+2. 服务名称节点
+
+在根目录下，为每个服务创建一个节点，节点名通常是服务的名字。例如，对于一个名为 `UserService` 的服务，可以创建一个名为 `/services/UserService` 的节点。
+
+3. 服务实例节点
+
+在每个服务节点下，为每个服务实例创建一个临时节点（ephemeral node）。临时节点的特点是，当创建它的客户端断开连接时，该节点会被自动删除。这样可以保证失效的服务实例能够被及时清除。
+
+每个服务实例节点的命名可以包含实例的唯一标识信息，例如 IP 地址和端口号。例如，一个名为 `192.168.1.100:8080` 的服务实例节点可以表示该服务运行在 IP 地址为 `192.168.1.100` 的机器上，端口号为 `8080`。
+
+### 5. 服务提供者的掉线处理逻辑
+
+1. 服务提供者启动：
+
+   启动时，服务提供者向ZooKeeper注册一个临时节点，表示自身已上线。
+
+2. 服务消费者订阅：
+
+   服务消费者订阅服务名称节点，监听服务提供者的上线和下线事件。
+
+3. 服务提供者掉线：
+
+   当服务提供者掉线时，其临时节点会被自动删除。
+
+4. 服务消费者感知掉线：
+
+   服务消费者通过监听机制感知到服务提供者临时节点的删除事件。
+
+5. 重新选择服务实例：
+
+   服务消费者根据新的服务实例列表重新选择一个可用的服务实例。
+
+6. 更新缓存：
+
+   更新服务消费者的本地缓存，确保缓存中的服务实例列表是最新的。
+
+
+
+## 在客户端建立本地服务缓存并实时更新
+
+### :star: 基本过程
+
+1. 客户端
+
+   1. 建立一个本地缓存，缓存服务地址信息，作为优化的方案
+   2. 服务发现时应该先去寻找本地缓存
+
+2. 服务端
+
+   1. 如何更新缓存？
+
+      首先去本地缓存中读，读不到，再去注册中心中读，返回数据时刷新缓存....等等老生常谈的八股
+
+      如果一个服务在注册中心中新增了一个地址，但是调用方始终能在本地缓存中读到这个服务，**那么 新增的变化就永远无法感知
+
+      **如何解决？**
+
+      通过在注册中心注册Watcher，监听注册中心的变化，实现本地缓存的动态更新
+
+      ​	客户端**首先将 `Watcher`注册到服务端**，同时将 `Watcher`对象**保存到客户端的`watch`管理器中**。
+      ​	当`Zookeeper`服务端监听的数据状态发生变化时，服务端会**主动通知客户端**，
+      ​	接着客户端的 `Watch`管理器会**触发相关 `Watcher`**来回调相应处理逻辑，从而完成整体的数据 `发布/订阅`流程
+
+   2. **在ZKServiceCenter 加入缓存和监听器**
+
+   
+
+### **1.本地缓存怎么做的？能保证缓存和服务的一致性吗？**
+
+在客户端设计一个缓存层，每次调用服务时从缓存层中获取地址，避免直接调用注册中心，优化速度和资源
+
+可以。这里使用了zookeeper的监听机制，在服务节点上注册Watcher，当注册中心的服务地址发生改动时，Watcher会异步通知客户端的缓存层修改对应的地址，从而实现两者的一致性
+
+
+
+以前的版本中，**调用方每次调用服务，都要去注册中心zookeeper中查找地址**，性能是不是很差呢？
+
+**我们可以在客户端建立一个本地缓存，缓存服务地址信息，作为优化的方案**
+
+### 创建缓存
+
+在Client层建立cache包
+
+**本地缓存serviceCache**
+
+```java
+public class serviceCache {
+    //key: serviceName 服务名
+    //value： addressList 服务提供者列表
+    private static Map<String, List<String>> cache=new HashMap<>();
+
+    //添加服务
+    public void addServcieToCache(String serviceName,String address){
+        if(cache.containsKey(serviceName)){
+            List<String> addressList = cache.get(serviceName);
+            addressList.add(address);
+            System.out.println("将name为"+serviceName+"和地址为"+address+"的服务添加到本地缓存中");
+        }else {
+            List<String> addressList=new ArrayList<>();
+            addressList.add(address);
+            cache.put(serviceName,addressList);
+        }
+    }
+    //从缓存中取服务地址
+    public  List<String> getServcieFromCache(String serviceName){
+        if(!cache.containsKey(serviceName)) {
+            return null;
+        }
+        List<String> a=cache.get(serviceName);
+        return a;
+    }
+    //从缓存中删除服务地址
+    public void delete(String serviceName,String address){
+        List<String> addressList = cache.get(serviceName);
+        addressList.remove(address);
+        System.out.println("将name为"+serviceName+"和地址为"+address+"的服务从本地缓存中删除");
+    }
+}
+```
+
+既然设立了服务缓存，那么在ZKServiceCenter中，服务发现时应该先去寻找本地缓存
+
+**修改ZKServiceCenter的serviceDiscovery方法**
+
+```java
+@Override
+public InetSocketAddress serviceDiscovery(String serviceName) {
+    try {
+        //先从本地缓存中找
+        List<String> serviceList=cache.getServcieFromCache(serviceName);
+        //如果找不到，再去zookeeper中找
+        //这种i情况基本不会发生，或者说只会出现在初始化阶段
+        if(serviceList==null) {
+            serviceList=client.getChildren().forPath("/" + serviceName);
+        }
+        // 这里默认用的第一个，后面加负载均衡
+        String string = serviceList.get(0);
+        return parseAddress(string);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+```
+
+### 动态更新缓存的实现
+
+那么如何更新缓存呢？
+
+**首先在你脑海的肯定是最经典的cache aside旁路缓存策略**
+
+- 首先去本地缓存中读，读不到，再去注册中心中读，返回数据时刷新缓存....等等老生常谈的八股
+
+但是这种策略，不适用于当前场景，或者说，在当前场景下，存在很多问题（这是笔者在刚拿rpc项目时面试被问到的问题，属实被问懵逼了）
+
+比如如下场景
+
+![image-20241005112413320](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241005112413320-1729340963499-2.png)
+
+如果一个服务在注册中心中新增了一个地址，但是调用方始终能在本地缓存中读到这个服务，**那么 新增的变化就永远无法感知到....**
+
+**那么问题来了，Server端新上一个服务地址，Client端的本地缓存该怎么才能感知到呢**
+
+- 笔者当时的回答是：Server新上一个地址时，去更新Client端的本地缓存....简直就是倒反天罡了。当时还停留在单体架构的项目思维中，所以回答的莫名其妙。面罢研究了一番，才幡然醒悟
+
+- 那么正解是：**通过在注册中心注册Watcher，监听注册中心的变化，实现本地缓存的动态更新**
+
+
+简单介绍一下zookeeper的事务监听机制
+
+### 事件监听机制
+
+### **watcher概念**
+
+- `zookeeper`**提供了数据的`发布/订阅`功能，多个订阅者可同时监听某一特定主题对象，当该主题对象的自身状态发生变化时例如节点内容改变、节点下的子节点列表改变等，会实时、主动通知所有订阅者**
+- `zookeeper`**采用了 `Watcher`机制实现数据的发布订阅功能。该机制在被订阅对象发生变化时会异步通知客户端**，因此客户端不必在 `Watcher`注册后轮询阻塞，从而减轻了客户端压力
+- `watcher`机制事件上与观察者模式类似，也可**看作是一种观察者模式在分布式场景下的实现方式**
+
+### watcher架构
+
+`watcher`实现由三个部分组成
+
+- `zookeeper`服务端
+- `zookeeper`客户端
+- 客户端的`ZKWatchManager对象`
+
+客户端**首先将 `Watcher`注册到服务端**，同时将 `Watcher`对象**保存到客户端的`watch`管理器中**。当`Zookeeper`服务端监听的数据状态发生变化时，服务端会**主动通知客户端**，接着客户端的 `Watch`管理器会**触发相关 `Watcher`**来回调相应处理逻辑，从而完成整体的数据 `发布/订阅`流程
+
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241019205815720.png" alt="image-20241019205815720" style="zoom:50%;" />
+
+使用curator，可以方便的进行watcher的使用。建议大家先写一个小demo熟悉一下使用
+
+**watchZK 监听zookeeper的实现**
+
+```java
+public class watchZK {
+    // curator 提供的zookeeper客户端
+    private CuratorFramework client;
+    //本地缓存
+    serviceCache cache;
+
+    public watchZK(CuratorFramework client,serviceCache  cache){
+        this.client=client;
+        this.cache=cache;
+    }
+
+    /**
+     * 监听当前节点和子节点的 更新，创建，删除
+     * @param path
+     */
+    public void watchToUpdate(String path) throws InterruptedException {
+        CuratorCache curatorCache = CuratorCache.build(client, "/");
+        curatorCache.listenable().addListener(new CuratorCacheListener() {
+            @Override
+            public void event(Type type, ChildData childData, ChildData childData1) {
+                // 第一个参数：事件类型（枚举）
+                // 第二个参数：节点更新前的状态、数据
+                // 第三个参数：节点更新后的状态、数据
+                // 创建节点时：节点刚被创建，不存在 更新前节点 ，所以第二个参数为 null
+                // 删除节点时：节点被删除，不存在 更新后节点 ，所以第三个参数为 null
+                // 节点创建时没有赋予值 create /curator/app1 只创建节点，在这种情况下，更新前节点的 data 为 null，获取不到更新前节点的数据
+                switch (type.name()) {
+                    case "NODE_CREATED": // 监听器第一次执行时节点存在也会触发次事件
+                        //获取更新的节点的路径
+                        String path=new String(childData1.getPath());
+                        //按照格式 ，读取
+                        String[] pathList= path.split("/");
+                        if(pathList.length<=2) break;
+                        else {
+                            String serviceName=pathList[1];
+                            String address=pathList[2];
+                            //将新注册的服务加入到本地缓存中
+                            cache.addServcieToCache(serviceName,address);
+                        }
+                        break;
+                    case "NODE_CHANGED": // 节点更新
+                        if (childData.getData() != null) {
+                            System.out.println("修改前的数据: " + new String(childData.getData()));
+                        } else {
+                            System.out.println("节点第一次赋值!");
+                        }
+                        System.out.println("修改后的数据: " + new String(childData1.getData()));
+                        break;
+                    case "NODE_DELETED": // 节点删除
+                        String path_d=new String(childData.getPath());
+                        //按照格式 ，读取
+                        String[] pathList_d= path_d.split("/");
+                        if(pathList_d.length<=2) break;
+                        else {
+                            String serviceName=pathList_d[1];
+                            String address=pathList_d[2];
+                            //将新注册的服务加入到本地缓存中
+                            cache.delete(serviceName,address);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+        //开启监听
+        curatorCache.start();
+    }
+}
+```
+
+**在ZKServiceCenter 加入缓存和监听器**
+
+```java
+//负责zookeeper客户端的初始化，并与zookeeper服务端进行连接
+public ZKServiceCenter() throws InterruptedException {
+    // 指数时间重试
+    RetryPolicy policy = new ExponentialBackoffRetry(1000, 3);
+    // zookeeper的地址固定，不管是服务提供者还是，消费者都要与之建立连接
+    // sessionTimeoutMs 与 zoo.cfg中的tickTime 有关系，
+    // zk还会根据minSessionTimeout与maxSessionTimeout两个参数重新调整最后的超时值。默认分别为tickTime 的2倍和20倍
+    // 使用心跳监听状态
+    this.client = CuratorFrameworkFactory.builder().connectString("127.0.0.1:2181")
+            .sessionTimeoutMs(40000).retryPolicy(policy).namespace(ROOT_PATH).build();
+    this.client.start();
+    System.out.println("zookeeper 连接成功");
+    //初始化本地缓存
+    cache=new serviceCache();
+    //加入zookeeper事件监听器
+    watchZK watcher=new watchZK(client,cache);
+    //监听启动
+    watcher.watchToUpdate(ROOT_PATH);
+}
+```
+
+
+
+## 自定义编码器、解码器和序列化器
 
 netty中的重要组件：
 
@@ -1132,6 +1896,26 @@ decoder 读取字节数组，获得里面的对象
 - **在内部实现消息头的加工，解决沾包问题**
 
 - **消息头中加入messageType消息类型，对消息的读取机制有了进一步的拓展**
+
+### **1. 为什么会出现沾包问题？如何解决的？**
+
+​	netty默认底层通过TCP 进行传输，TCP**是面向流的协议**，接收方在**接收到数据时无法直接得知一条消息的具体字节数，不知道数据的界限**。由于TCP的流量控制机制，发生沾包或拆包，会导致接收的一个包可能会有多条消息或者不足一条消息，从而会出现接收方少读或者多读导致消息不能读完全的情况发生
+
+​	在发送消息时，先告诉接收方消息的长度，让接收方读取指定长度的字节，就能避免这个问题；项目中通过自定义的消息传输协议来实现对沾包问题的解决。
+
+### 2. 自定义消息格式
+
+我的解决办法是自定义消息头：
+
+![image-20240813150328363](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20240813150328363.png)
+
+我的消息头包括：魔法数(4B)、版本(1B)、消息长度(4B)、消息类型(1B)、压缩类型(1B)、序列化类型(1B)、请求Id(4B)
+
+魔法数主要是为了筛选来到服务端的数据包，有了这个魔数之后，服务端首先取出前面四个字节进行比对，能够在第一时间识别出这个数据包并非是遵循自定义协议的，也就是无效数据包，为了安全考虑可以直接关闭连接以节省资源
+
+
+
+
 
 ### **自定义序列化器**
 
@@ -1244,7 +2028,7 @@ public class JsonSerializer implements Serializer {
 
 #### 2.protobuf序列化（待补充）
 
-### 修改nettyInitializer
+修改nettyInitializer
 
 是不是层次分明了很多了呢？
 
@@ -1280,238 +2064,82 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
 }
 ```
 
-## part2 在客户端建立本地服务缓存并实现动态更新
+### 3 . 什么叫做序列化?Java原生序列化有什么问题？使用Kryo和JAVA序列化速度的差异?
 
-以前的版本中，**调用方每次调用服务，都要去注册中心zookeeper中查找地址**，性能是不是很差呢？
+序列化就是将**类对象编码成可在网络中传输的二进制数据**，
 
-**我们可以在客户端建立一个本地缓存，缓存服务地址信息，作为优化的方案**
+jdk原生序列化有下面三个问题：
 
-![image-20241005112356944](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112356944.png)
+1.Java序列化机制是Java内部的一种对象编解码技术，**无法跨语言使用。例**如对于异构系统之间的对接，Java序列化后的码流需要能够通过其他语言反序列化成原始对象(副本)，目前很难支持。
 
-### 创建缓存
+2.相比于其他开源的序列化框架，**Java序列化后的码流太大**，无论是网络传输还是持久化到磁盘，都会导致额外的资源占用。
 
-在Client层建立cache包
+**3.序列化性能差**，资源占用率高(主要是CPU资源占用高)。
 
-**本地缓存serviceCache**
+**为什么选Kryo**
 
-```java
-public class serviceCache {
-    //key: serviceName 服务名
-    //value： addressList 服务提供者列表
-    private static Map<String, List<String>> cache=new HashMap<>();
+Kryo 是专门针对Java 语言序列化方式并且性能非常好，并且 Dubbo 官网的一篇文章中提到说推荐使用 Kryo 作为生产环境的序列化方式，Kryo 的序列化和反序列化速度非常快，序列化后的数据体积较小
 
-    //添加服务
-    public void addServcieToCache(String serviceName,String address){
-        if(cache.containsKey(serviceName)){
-            List<String> addressList = cache.get(serviceName);
-            addressList.add(address);
-            System.out.println("将name为"+serviceName+"和地址为"+address+"的服务添加到本地缓存中");
-        }else {
-            List<String> addressList=new ArrayList<>();
-            addressList.add(address);
-            cache.put(serviceName,addressList);
-        }
-    }
-    //从缓存中取服务地址
-    public  List<String> getServcieFromCache(String serviceName){
-        if(!cache.containsKey(serviceName)) {
-            return null;
-        }
-        List<String> a=cache.get(serviceName);
-        return a;
-    }
-    //从缓存中删除服务地址
-    public void delete(String serviceName,String address){
-        List<String> addressList = cache.get(serviceName);
-        addressList.remove(address);
-        System.out.println("将name为"+serviceName+"和地址为"+address+"的服务从本地缓存中删除");
-    }
-}
-```
+使用Kryo需要注意
 
-既然设立了服务缓存，那么在ZKServiceCenter中，服务发现时应该先去寻找本地缓存
+Kryo由于其变长存储特性并使用了字节码生成机制，拥有较高的运行速度和较小的字节码体积因为 Kryo 不是线程安全的。使用 ThreadLocal 来存储 Kryo 对象，一个线程一个 Kryo 实例。
 
-**修改ZKServiceCenter的serviceDiscovery方法**
+**Kryo和其他序列化方式的比较**
 
-```java
-@Override
-public InetSocketAddress serviceDiscovery(String serviceName) {
-    try {
-        //先从本地缓存中找
-        List<String> serviceList=cache.getServcieFromCache(serviceName);
-        //如果找不到，再去zookeeper中找
-        //这种i情况基本不会发生，或者说只会出现在初始化阶段
-        if(serviceList==null) {
-            serviceList=client.getChildren().forPath("/" + serviceName);
-        }
-        // 这里默认用的第一个，后面加负载均衡
-        String string = serviceList.get(0);
-        return parseAddress(string);
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return null;
-}
-```
+**Hessian对java一些常见的对象类型不支持，如 Linked系列、Locale类等等**
 
-### 动态更新缓存的实现
+Protobuf是由谷歌公司开发的数据语言，支持java、C++、python等多平台**，序列化后体积较小，转化性能较高。但需要预编译IDL**
 
-那么如何更新缓存呢？
+Protostuff不需要依赖IDL文件，可以直接对Java 领域对象进行反/序列化操作，在效率上跟 Protobuf差不多，生成的二进制格式和Protobuf是完全相同的，可以说是一个Java版本的 Protobuf序列化框架。但不支持null，也不支持单纯的 Map、List 集合对象,需要包在对象里面。
 
-**首先在你脑海的肯定是最经典的cache aside旁路缓存策略**
-
-- 首先去本地缓存中读，读不到，再去注册中心中读，返回数据时刷新缓存....等等老生常谈的八股
-
-但是这种策略，不适用于当前场景，或者说，在当前场景下，存在很多问题（这是笔者在刚拿rpc项目时面试被问到的问题，属实被问懵逼了）
-
-比如如下场景
-
-![image-20241005112413320](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112413320.png)
-
-如果一个服务在注册中心中新增了一个地址，但是调用方始终能在本地缓存中读到这个服务，**那么 新增的变化就永远无法感知到....**
-
-**那么问题来了，Server端新上一个服务地址，Client端的本地缓存该怎么才能感知到呢**
-
-- 笔者当时的回答是：Server新上一个地址时，去更新Client端的本地缓存....简直就是倒反天罡了。当时还停留在单体架构的项目思维中，所以回答的莫名其妙。面罢研究了一番，才幡然醒悟
-
-- 那么正解是：**通过在注册中心注册Watcher，监听注册中心的变化，实现本地缓存的动态更新**
+**Kryo可以有效处理 Java 的复杂对象结构，包括嵌套对象、集合等，且对循环引用和深层次对象有很好的支持，而且Dubbo 官网的一篇文章中提到说推荐使用 Kryo 作为生产环境的序列化方式**
 
 
-简单介绍一下zookeeper的事务监听机制
 
-#### 事件监听机制
+### 4. Rpc中的数据安全是如何实现的
 
-**watcher概念**
+1. **加密通信**：
+   - 使用TLS/SSL（Transport Layer Security / Secure Sockets Layer）来加密客户端和服务器之间的通信。TLS/SSL 可以提供端到端的加密，防止中间人攻击，确保数据的机密性和完整性。
 
-- `zookeeper`**提供了数据的`发布/订阅`功能，多个订阅者可同时监听某一特定主题对象，当该主题对象的自身状态发生变化时例如节点内容改变、节点下的子节点列表改变等，会实时、主动通知所有订阅者**
-- `zookeeper`**采用了 `Watcher`机制实现数据的发布订阅功能。该机制在被订阅对象发生变化时会异步通知客户端**，因此客户端不必在 `Watcher`注册后轮询阻塞，从而减轻了客户端压力
-- `watcher`机制事件上与观察者模式类似，也可**看作是一种观察者模式在分布式场景下的实现方式**
+2. **身份验证**：
+   - 实施双向认证（Mutual Authentication），即不仅客户端需要验证服务器的身份，服务器也需要验证客户端的身份。这通常通过使用数字证书来实现。
 
-#### watcher架构
+3. **授权控制**：
+   - 在服务端对客户端进行授权检查，确保只有经过授权的客户端才能访问特定的服务。可以使用OAuth、JWT（JSON Web Tokens）或其他身份验证协议来管理访问权限。
 
-`watcher`实现由三个部分组成
+4. **数据签名**：
+   - 使用数字签名来确保消息的完整性和来源的真实性。数字签名可以通过非对称加密算法来实现，如RSA或ECDSA。
 
-- `zookeeper`服务端
-- `zookeeper`客户端
-- 客户端的`ZKWatchManager对象`
+5. **消息完整性校验**：
+   - 使用哈希函数（如SHA-256）计算消息摘要，并将其附加在消息后面，接收方可以验证摘要以确认消息没有被篡改。
 
-客户端**首先将 `Watcher`注册到服务端**，同时将 `Watcher`对象**保存到客户端的`watch`管理器中**。当`Zookeeper`服务端监听的数据状态发生变化时，服务端会**主动通知客户端**，接着客户端的 `Watch`管理器会**触发相关 `Watcher`**来回调相应处理逻辑，从而完成整体的数据 `发布/订阅`流程
+6. **审计和监控**：
+   - 记录和监控RPC请求和响应，以便检测任何异常行为或潜在的安全威胁。
 
-![image-20241005112456383](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112456383.png)
+7. **使用安全的协议和框架**：
+   - 选择支持内置安全特性的RPC框架，如gRPC支持TLS加密，Thrift可以使用SSL/TLS进行加密等。
 
-使用curator，可以方便的进行watcher的使用。建议大家先写一个小demo熟悉一下使用
+8. **最小权限原则**：
+   - 为服务和客户端分配尽可能少的权限，仅授予执行其职责所需的最小权限。
 
-**watchZK 监听zookeeper的实现**
+9. **定期更新和打补丁**：
+   - 定期更新RPC框架、库和其他依赖项，确保使用最新的安全补丁和修复。
 
-```java
-public class watchZK {
-    // curator 提供的zookeeper客户端
-    private CuratorFramework client;
-    //本地缓存
-    serviceCache cache;
+10. **网络隔离**：
+    - 将RPC服务部署在网络隔离区域（如DMZ），并限制只有必要的服务能够互相通信。
 
-    public watchZK(CuratorFramework client,serviceCache  cache){
-        this.client=client;
-        this.cache=cache;
-    }
+11. **安全配置**：
+    - 确保RPC服务的安全配置正确无误，避免默认配置中可能存在的安全隐患。
 
-    /**
-     * 监听当前节点和子节点的 更新，创建，删除
-     * @param path
-     */
-    public void watchToUpdate(String path) throws InterruptedException {
-        CuratorCache curatorCache = CuratorCache.build(client, "/");
-        curatorCache.listenable().addListener(new CuratorCacheListener() {
-            @Override
-            public void event(Type type, ChildData childData, ChildData childData1) {
-                // 第一个参数：事件类型（枚举）
-                // 第二个参数：节点更新前的状态、数据
-                // 第三个参数：节点更新后的状态、数据
-                // 创建节点时：节点刚被创建，不存在 更新前节点 ，所以第二个参数为 null
-                // 删除节点时：节点被删除，不存在 更新后节点 ，所以第三个参数为 null
-                // 节点创建时没有赋予值 create /curator/app1 只创建节点，在这种情况下，更新前节点的 data 为 null，获取不到更新前节点的数据
-                switch (type.name()) {
-                    case "NODE_CREATED": // 监听器第一次执行时节点存在也会触发次事件
-                        //获取更新的节点的路径
-                        String path=new String(childData1.getPath());
-                        //按照格式 ，读取
-                        String[] pathList= path.split("/");
-                        if(pathList.length<=2) break;
-                        else {
-                            String serviceName=pathList[1];
-                            String address=pathList[2];
-                            //将新注册的服务加入到本地缓存中
-                            cache.addServcieToCache(serviceName,address);
-                        }
-                        break;
-                    case "NODE_CHANGED": // 节点更新
-                        if (childData.getData() != null) {
-                            System.out.println("修改前的数据: " + new String(childData.getData()));
-                        } else {
-                            System.out.println("节点第一次赋值!");
-                        }
-                        System.out.println("修改后的数据: " + new String(childData1.getData()));
-                        break;
-                    case "NODE_DELETED": // 节点删除
-                        String path_d=new String(childData.getPath());
-                        //按照格式 ，读取
-                        String[] pathList_d= path_d.split("/");
-                        if(pathList_d.length<=2) break;
-                        else {
-                            String serviceName=pathList_d[1];
-                            String address=pathList_d[2];
-                            //将新注册的服务加入到本地缓存中
-                            cache.delete(serviceName,address);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        });
-        //开启监听
-        curatorCache.start();
-    }
-}
-```
+实施这些措施时，需要综合考虑系统的性能、易用性和安全性，找到一个合适的平衡点。在实际应用中，通常会结合使用多种方法来增强系统的整体安全性。
 
-**在ZKServiceCenter 加入缓存和监听器**
 
-```java
-//负责zookeeper客户端的初始化，并与zookeeper服务端进行连接
-public ZKServiceCenter() throws InterruptedException {
-    // 指数时间重试
-    RetryPolicy policy = new ExponentialBackoffRetry(1000, 3);
-    // zookeeper的地址固定，不管是服务提供者还是，消费者都要与之建立连接
-    // sessionTimeoutMs 与 zoo.cfg中的tickTime 有关系，
-    // zk还会根据minSessionTimeout与maxSessionTimeout两个参数重新调整最后的超时值。默认分别为tickTime 的2倍和20倍
-    // 使用心跳监听状态
-    this.client = CuratorFrameworkFactory.builder().connectString("127.0.0.1:2181")
-            .sessionTimeoutMs(40000).retryPolicy(policy).namespace(ROOT_PATH).build();
-    this.client.start();
-    System.out.println("zookeeper 连接成功");
-    //初始化本地缓存
-    cache=new serviceCache();
-    //加入zookeeper事件监听器
-    watchZK watcher=new watchZK(client,cache);
-    //监听启动
-    watcher.watchToUpdate(ROOT_PATH);
-}
-```
 
-## 项目架构图
 
-![image-20241005112510644](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112510644.png)
 
-# Java手写RPC框架系列-04-第三版
 
-接上期内容，这期我们实现
 
-1.负载均衡算法的实现和应用
-
-2.超时重传，和白名单
-
-## part1-负载均衡
+## 负载均衡
 
 在之前的版本中，当客户端请求服务时，取 **从注册中心返回的服务地址列表中的第一个 作为访问的地址**
 
@@ -1519,7 +2147,7 @@ public ZKServiceCenter() throws InterruptedException {
 
 所以在一些流量较大的服务上，我们会设置多个节点服务器处理请求，并使用负载均衡的思想 将请求分摊到每个节点上
 
-![image-20241005112554819](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112554819.png)
+![image-20241005112554819](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241005112554819-1729341172492-10.png)
 
 ### 常见的负载均衡算法
 
@@ -1555,7 +2183,7 @@ public ZKServiceCenter() throws InterruptedException {
 
    - 如果服务器配置不同，**随机法可能导致负载不均衡**，影响整体性能。
 
-6. 一致性哈希法（Consistent Hashing）
+3. 一致性哈希法（Consistent Hashing）
 
    **原理**：一致性哈希法**将输入（如客户端IP地址）通过哈希函数映射到一个固定大小的环形空间（哈希环）上**，**每个服务器也映射到这个哈希环上**。客户端的请求会根据哈希值在哈希环上顺时针查找，遇到的第一个服务器就是该请求的目标服务器。
 
@@ -1570,8 +2198,6 @@ public ZKServiceCenter() throws InterruptedException {
    - **在哈希环偏斜的情况下，大部分的缓存对象很有可能会缓存到一台服务器上**，导致缓存分布极度不均匀。
 
    - **实现较为复杂**，需要引入虚拟节点等技术来解决哈希偏斜问题。
-
-### 代码实现
 
 **定义LoadBalance接口**
 
@@ -1759,9 +2385,7 @@ public InetSocketAddress serviceDiscovery(String serviceName) {
 }
 ```
 
-### TODO 思考和优化
-
-#### 1.LRU适合作为负载均衡的一个实现吗？
+### 1.LRU适合作为负载均衡的一个实现吗？
 
 不适合。
 
@@ -1775,7 +2399,7 @@ LRU的思想可以被借鉴用于负载均衡。例如可以设计一个基于�
 
 
 
-#### 2.当各个服务器的负载能力不一致时，该怎么设置负载均衡算法，来保证各服务器接收到的流量是合适的呢？
+### 2.当各个服务器的负载能力不一致时，该怎么设置负载均衡算法，来保证各服务器接收到的流量是合适的呢？
 
 前面学习过一致性哈希算法 就会知道，在一致性哈希算法中，使用虚拟节点对真实节点进行映射，并且能通过设置虚拟节点的个数 来控制该节点接收到请求的概率。
 
@@ -1783,7 +2407,7 @@ LRU的思想可以被借鉴用于负载均衡。例如可以设计一个基于�
 
 
 
-#### ？自适应的负载均衡
+### 3. 自适应的负载均衡
 
 RPC 的负载均衡完全由 RPC 框架自身实现，服务调用者发起请求时，会通过配置的负载均衡插件，自主地选择服务节点。那是不是只要调用者知道每个服务节点处理请求的能力，再根据服务处理节点处理请求的能力来判断要打给它多少流量就可以了？当一个服务节点负载过高或响应过慢时，就少给它发送请求，反之则多给它发送请求。
 
@@ -1791,7 +2415,7 @@ RPC 的负载均衡完全由 RPC 框架自身实现，服务调用者发起请�
 
 那服务调用者节点又该如何判定一个服务节点的处理能力呢？
 
-- 可以采用一种打分的策略，服务调用者收集与之建立长连接的每个服务节点的指标数据，
+- 可以采用一种打分的策略，**服务调用者收集与之建立长连接的每个服务节点的指标数据，**
 
 - 我们可以为每个指标都设置一个**指标权重占比，然后再根据这些指标数据，计算分数。**
 
@@ -1801,7 +2425,30 @@ RPC 的负载均衡完全由 RPC 框架自身实现，服务调用者发起请�
 
 
 
-## part2-超时重试 &白名单
+### **4. 某个服务多个节点承压能力不一，怎么办？**
+
+​	前面学习过一致性哈希算法 就会知道，在一致性哈希算法中，使用虚拟节点对真实节点进行映射，并且能通过设置虚拟节点的个数 来控制该节点接收到请求的概率。
+
+​	所以在服务器负载能力不一致的情况下，我们可以在服务端将服务器的负载能力写入到注册中心中，客户端在进行负载均衡时会在注册中心中获取各服务器的能力，并设置对应的虚拟节点的数量，来控制流量的分发。
+
+​	这里可以拓展一下自适应负载均衡的实现
+
+### 5.  如何使用 SPI 实现负载均衡？
+
+1. **定义负载均衡接口**：
+   - 开发者首先定义一个负载均衡策略的接口，这个接口定义了负载均衡算法应该提供的方法，比如选择下一个服务器来处理请求。
+2. **实现负载均衡策略**：
+   - 不同的负载均衡策略（例如轮询、最少连接数、随机选择等）可以通过实现上述接口来具体化。每个实现类代表了一种具体的负载均衡算法。
+3. **配置 SPI 文件**：
+   - 对于每一个实现了负载均衡接口的类，都需要在 `META-INF/services` 目录下创建一个 SPI 配置文件。该文件名应为接口的全限定名，文件内容为实现类的全限定名。这使得 Java 运行时可以通过 ServiceLoader 自动加载这些实现。
+4. **动态加载负载均衡策略**：
+   - 在运行时，应用可以使用 `ServiceLoader` 加载所有可用的负载均衡实现，并根据需要选择其中的一种。选择过程可以基于配置文件或者环境变量来进行。
+5. **集成到负载均衡器中**：
+   - 最终，选定的负载均衡策略会被集成到负载均衡器中，用来决定如何分配请求到不同的后端服务器上。
+
+这样的设计模式使得负载均衡策略可以灵活配置，而不必硬编码到应用中。此外，当需要添加新的负载均衡算法时，只需要添加新的实现类和 SPI 配置即可，无需更改已有的代码。
+
+## 超时重试 &白名单
 
 ### **为什么需要超时重试？**
 
@@ -1877,9 +2524,9 @@ public class guavaRetry {
 2. withWaitStrategy()：重试等待策略 
 3. withStopStrategy()：停止重试策略 
 4. withAttemptTimeLimiter：设置任务单次执行的时间限制，如果超时则抛出异常
-5.  withBlockStrategy()：设置任务阻塞策略，即可以设置当前重试完成，下次重试开始前的这段时间做什么事情
+5. withBlockStrategy()：设置任务阻塞策略，即可以设置当前重试完成，下次重试开始前的这段时间做什么事情
 
-#### 重试机制存在什么问题？
+### 重试机制问题？白名单解决方式
 
 如果这个服务业务逻辑不是幂等的，比如插入数据操作，那触发重试的话会不会引发问题呢？**会的。**
 
@@ -1990,31 +2637,35 @@ public class ClientProxy implements InvocationHandler {
 }
 ```
 
-##  项目架构图
 
-![image-20241005112618562](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112618562.png)
 
-# Java手写RPC框架系列-05-第四版
+### **1. 网络抖动导致某个节点被下线了，过一会网络好了，考虑过这个问题吗？**
 
-接上期内容，这期我们实现
+当调用端发起的请求失败时，RPC 框架自身可以进行重试，再重新发送请求，通过这种方式保证系统的容错率；
 
-1.服务限流，降级
+项目使用Google Guava这款性能强大且轻量的框架来实现失败重试的功能；
 
-2.服务熔断
+### **2. 每个服务都进行重试吗？**
 
-**食用说明：**
+如果这个服务业务逻辑不是幂等的，比如插入数据操作，那触发重试的话会不会引发问题呢？
 
-1.最好自己跟着敲一遍
+会的。
 
-2.最好先学习限流算法的理论基础，理解限流，降级，熔断的概念
+在使用 RPC 框架的时候，要确保被调用的服务的业务逻辑是幂等的，这样才能考虑根据事件情况开启 RPC 框架的异常重试功能
 
-RPC 是解决分布式系统通信问题的一大利器，而分布式系统的一大特点就是高并发，所以说 RPC 也会面临高并发的场景。在这样的情况下，提供服务的每个服务节点就都可能由于访问量过大而引起一系列的问题，比如业务处理耗时过长、CPU 飘高、频繁 Full GC 以及服务进程直接宕机等等。但是在生产环境中，要保证服务的稳定性和高可用性，这时就需要业务进行自我保护，从而保证在高访问量、高并发的场景下，应用系统依然稳定，服务依然高可用。 我们可以将 RPC 框架拆开来分析，RPC 调用包括服务端和调用端，下面分别说明一下服务端与调用端分别是如何进行自我保护的。
+所以，我们可以**设置一个白名单**，服务端在注册节点时，将幂等性的服务注册在白名单中，客户端在请求服务前，先去白名单中查看该服务是否为幂等服务，如果是的话使用重试框架进行调用
 
-## part1-服务-限流
+白名单存放在zookeeper中（充当配置中心的角色）
+
+
+
+
+
+## 服务限流
 
 **假如要发布一个 RPC 服务，作为服务端接收调用端发送过来的请求，这时服务端的某个节点负载压力过高了，该如何保护这个节点？**
 
-![image-20241005112703215](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112703215.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241005112703215-1729341407250-12.png" alt="image-20241005112703215" style="zoom:50%;" />
 
 这个问题还是很好解决的**，既然负载压力高，那就不让它再接收太多的请求就好了**，等接收和处理的请求数量下来后，这个节点的负载压力自然就下来了。
 
@@ -2042,7 +2693,12 @@ RPC 是解决分布式系统通信问题的一大利器，而分布式系统的�
 
 在这里提下漏桶**，漏桶由于出水量固定，所以无法应对突然的流量爆发访问，也就是没有保证瞬时速率的功能，但是可以保证平均速率**
 
+### 1. 有哪些常见的限流算法
 
+- **固定窗口计数器算法**：固定窗口其实就是时间窗口，其原理是将时间划分为固定大小的窗口，在每个窗口内限制请求的数量或速率，即固定窗口计数器算法规定了系统单位时间处理的请求数量。**限流不够平滑，无法保证限流速率。**
+- **滑动窗口计数器算法**：滑动窗口计数器算法 算的上是固定窗口计数器算法的升级版，限流的**颗粒度更小**。滑动窗口计数器算法相比于固定窗口计数器算法的优化在于：它把时间以一定比例分片 。例如我们的接口限流每分钟处理 60 个请求，我们可以把 1 分钟分为 60 个窗口。每隔 1 秒移动一次，每个窗口一秒只能处理不大于 60(请求数)/60（窗口数） 的请求， 如果当前窗口的请求计数总和超过了限制的数量的话就不再处理其他请求。**可以应对突然激增的流量**，**依然存在限流不够平滑**
+- **漏桶算法**：准备一个队列用来保存请求，然后我们定期从队列中拿请求来执行就好了（和消息队列削峰/限流的思想是一样的）。**无法应对突然激增的流量，因为只能以固定的速率处理请求，对系统资源利用不够友好。桶流入水（发请求）的速率如果一直大于桶流出水（处理请求）的速率的话，那么桶会一直是满的，一部分新的请求会被丢弃，导致服务质量下降**
+- **令牌桶算法**：请求在被处理之前需要拿到一个令牌，请求处理完毕之后将这个令牌丢弃（删除）。我们根据限流大小，按照一定的速率往桶里添加令牌。如果桶装满了，就不能继续往里面继续添加令牌了。
 
 ### 代码实现
 
@@ -2146,11 +2802,11 @@ private RpcResponse getResponse(RpcRequest rpcRequest){
     ...
 ```
 
-## part2-服务-熔断
+## 服务-熔断
 
 服务端进行自我保护，最简单有效的方式就是限流。那么调用端呢？调用端是否需要自我保护呢？举个例子，假如要发布一个服务 B，而服务 B 又依赖服务 C，当一个服务 A 来调用服务 B 时，服务 B 的业务逻辑调用服务 C，而这时服务 C 响应超时了，由**于服务 B 依赖服务 C，C 超时直接导致 B 的业务逻辑一直等待，而这个时候服务 A 在频繁地调用服务 B，服务 B 就可能会因为堆积大量的请求而导致服务宕机**
 
-![image-20241005112722502](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112722502.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241019212134794.png" alt="image-20241019212134794" style="zoom:50%;" />
 
 由此可见，服务 B 调用服务 C，服务 C 执行业务逻辑出现异常时，会影响到服务 B，甚至可能会引起服务 B 宕机。这还只是 A->B->C 的情况，试想一下 A->B->C->D->……呢？在整个调用链中，只要中间有一个服务出现问题，都可能会引起上游的所有服务出现一系列的问题，甚至会引起整个调用链的服务都宕机，这是非常恐怖的。
 
@@ -2332,328 +2988,91 @@ public Object invoke(Object proxy, Method method, Object[] args) throws Throwabl
 }
 ```
 
-## 架构图
-
-![image-20241005112739642](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20241005112739642-1728098859988-73.png)
-
-# Java手写RPC框架系列-06-项目常见问题
-
-## **网络传输层面**
-
-### **1.netty传输位于网络结构模型中的哪一层？**
-
-1. 传输层
-2. Netty支持TCP和UDP等传输层协议，通过对这些协议的封装和抽象，Netty能够处理传输层的数据传输任务，如建立连接、数据传输和连接关闭等。
-3. Netty的EventLoop和EventLoopGroup等组件基于Java NIO的多路复用器（Selector），实现了高效的IO事件处理机制，这在一定程度上与传输层的数据传输和事件处理机制相呼应。
-4. 应用层
-5. Netty提供了丰富的协议支持，如HTTP、WebSocket、SSL、Protobuf等，这些协议主要工作在应用层。Netty通过编解码器等组件，能够方便地在应用层对数据进行编解码，从而实现与应用层协议的交互。
-6. Netty的ChannelPipeline和ChannelHandler等组件构成了一个灵活的事件处理链，允许开发者在应用层自定义各种事件处理逻辑，如身份验证、消息加密、业务逻辑处理等。
-
-
-
-### **2.讲一讲netty在你项目中的作用和执行流程？**
-
-**作用**：引用高性能网络框架netty，实现了高效的信息传输；抽象了Java NIO底层的复杂性，提供了简单易用的API，简化了网络编程；提供各种组件方便网络数据的处理
-
-**执行流程：**
-
-1. 客户端发起请求
-2. 客户端根据服务地址通过Netty客户端API创建一个客户端Channel，并连接到服务端的指定端口。
-3. 客户端将RPC调用信息（如方法名、参数等）封装成请求消息，并通过Netty的编码器（Encoder）将请求消息序列化成字节流。
-4. 客户端将序列化后的字节流通过网络发送给服务端。
-5. 服务端接收请求并处理
-6. 服务端通过Netty服务端API监听指定端口，等待客户端的连接请求。
-7. 当接收到客户端的连接请求时，服务端通过Netty的解码器（Decoder）将接收到的字节流反序列化成请求消息。
-8. 服务端根据请求消息中的方法名和参数等信息，通过反射调用本地服务实现，并将执行结果封装成响应消息。
-9. 服务端通过Netty的编码器将响应消息序列化成字节流，并通过网络发送给客户端。
-10. 客户端接收响应
-11. 客户端接收到服务端的响应字节流后，通过Netty的解码器将字节流反序列化成响应消息。
-12. 客户端根据响应消息中的结果信息，进行相应的业务处理。
-
-### **3.为什么会出现沾包问题？如何解决的？**
-
-​	netty默认底层通过TCP 进行传输，TCP**是面向流的协议**，接收方在接收到数据时无法直接得知一条消息的具体字节数，不知道数据的界限。由于TCP的流量控制机制，发生沾包或拆包，会导致接收的一个包可能会有多条消息或者不足一条消息，从而会出现接收方少读或者多读导致消息不能读完全的情况发生
-
-​	在发送消息时，先告诉接收方消息的长度，让接收方读取指定长度的字节，就能避免这个问题；项目中通过自定义的消息传输协议来实现对沾包问题的解决。
-
-### **4.你听过过哪些序列化方式？觉得哪种数据序列化方式最好？**
-
-**Java对象序列化**
-
-**优点**：
-
-​	**兼容性高**，可以方便地在Java应用内部进行对象持久化和传输。
-
-**缺点**：
-
-​	序列化后的数据较大，速度相对较慢；不支持跨语言，仅适用于Java环境。
-
-**JSON**
-
-**优点**：
-
-​	**可读性好**：JSON数据以文本形式存在，易于人类阅读和编写，方便调试和日志记录。**跨语言支持**：几乎所有主流编程语言都提供了JSON的解析和生成库，使得JSON成为跨语言数据交换的理想选择。
-
-**缺点**：
-
-​	**效率较低**：相对于二进制序列化格式（如Protobuf和Hessian），JSON的解析和序列化效率较低，特别是在处理大型数据结构时。
-
-**Protobuf**
-
-**优点**：
-
-​	**高效**：Protobuf使用二进制编码，相比JSON和XML等文本格式，序列化后的数据更小，解析速度更快。
-
-​	**向前向后兼容**：Protobuf支持数据结构的向前和向后兼容，可以在不破坏旧程序的情况下更新数据结构。
-
-**缺点**：
-
-​	**可读性差**：Protobuf序列化后的数据是二进制格式，不易于人类直接阅读。
-
-​	**需要定义文件**：使用Protobuf需要先定义数据结构（.proto文件），然后生成序列化/反序列化的代码。
-
-**Hessian**
-
-**优点**：
-
-​	**高效**：Hessian是一个轻量级的remoting on http工具，提供了RMI的功能，采用二进制RPC协议，序列化效率高。
-
-​	**简单易用**：Hessian协议简单，实现起来相对容易。
-
-**缺点**：
-
-​	**可读性差**：Hessian序列化后的数据也是二进制格式，不易于人类直接阅读。
-
-​	**安全性不足**：Hessian传输没有加密处理，对于安全性要求高的应用可能不适用。
-
-​	**生态系统支持**：相对于JSON和Protobuf，Hessian的生态系统支持可能较少。
-
-
-
-对于Rpc框架来说，使用Protobuf或者Hessian这种序列化后为二进制格式的数据，在消息传输上相比于Json，会更加高效
-
-
-
-### **5.netty的常见八股**
-
-BIO,NIO；netty的构成，组件，执行流程
-
-[【硬核】肝了一月的Netty知识点-CSDN博客](https://blog.csdn.net/qq_35190492/article/details/113174359?spm=1001.2014.3001.5506)
-
-
-
-
-
-
-
-## **注册中心层面**
-
-### **1.zookeeper在项目中的角色？你为什么使用zookeeper**
-
-1. zookeeper作为项目的注册中心，实现着服务注册，服务发现和维护服务状态的功能；
-2. zookeeper具有高可用性，一致性，有着丰富的api，应用广阔，很多大数据框架都有他的身影。
-
-### **2.注册中心的意义？**
-
-①服务注册与发现：注册中心实现了微服务架构中各个微服务的服务注册与发现，这是其最基础也是最重要的功能。通过注册中心，各个微服务可以将自己的地址信息（如IP地址、端口号等）注册到中心，同时也能够从中发现其他微服务的地址信息。
-
-②动态性：在微服务架构中，服务的数量和位置可能会频繁变化。注册中心能够动态地处理这些变化，确保服务消费者能够实时获取到最新的服务提供者信息。
-
-③增强微服务之间的去中心化在单体项目中，模块之间的依赖关系是通过内部的直接引用来实现的。而在微服务架构中，注册中心的存在使得微服务之间的依赖关系不再是直接的函数引用，而是通过注册中心来间接调用。这种方式增强了微服务之间的去中心化，提高了系统的灵活性和可扩展性。
-
-④提升系统的可用性和容错性注册中心通常具有高可用性的设计，能够确保在部分节点故障时仍然能够正常工作。这使得整个微服务架构在面临故障时能够更加稳定地运行。
-
-### **3.zookeeper的常见八股**
-
-这里了解zookeeper的结构 和特点即可，面试一般不会问的太深入
-
-[https://blog.csdn.net/xiaojiejie_baby/article/details/136485414?ops_request_misc=&request_id=&biz_id=102&utm_term=zookeeper%E9%9D%A2%E8%AF%95%E9%A2%98&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-2-136485414.nonecase&spm=1018.2226.3001.4187](https://blog.csdn.net/xiaojiejie_baby/article/details/136485414?ops_request_misc=&request_id=&biz_id=102&utm_term=zookeeper面试题&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-2-136485414.nonecase&spm=1018.2226.3001.4187)
-
-### **4.  你为什么选择Zookeeper作为注册中心呢，为什么不用Nacos**
-
-zookeeper 的特性就是强一致性，这个不好答，可以从另一个优点：成熟稳定来答。因为 zookeeper 是一个成熟且运用广泛的分布式应用，在学习中发现 目前很多大数据应用如 kafka，hadoop，hbase 都是使用 zookeeper 来协调管理服务，所以我考虑采用了 zookeeper 作为注册中心
-
-
-
-## **算法层面**
-
-### **1.三种负载均衡算法的比较？**
-
-轮询法（Round Robin）
-
-1. **原理**：轮询法将所有请求按顺序轮流分配给后端服务器，依次循环。
-2. **优点**
-3. 简单易实现。
-4. 无状态，不保存任何信息，因此实现成本低。
-5. **缺点**
-6. 当后端服务器性能差异大时，无法根据服务器的负载情况进行动态调整，可能导致某些服务器负载过大或过小。
-7. 如果服务器配置不一样，不适合使用轮询法。
-
-随机法（Random）
-
-1. **原理**：随机法将请求随机分配到各个服务器。
-2. **优点**
-3. 分配较为均匀，避免了轮询法可能出现的连续请求分配给同一台服务器的问题。
-4. 使用简单，不需要复杂的配置。
-5. **缺点**
-6. 随机性可能导致某些服务器被频繁访问，而另一些服务器则相对较少，这取决于随机数的生成情况。
-7. 如果服务器配置不同，随机法可能导致负载不均衡，影响整体性能。
-
-一致性哈希法（Consistent Hashing）
-
-1. **原理**：一致性哈希法将输入（如客户端IP地址）通过哈希函数映射到一个固定大小的环形空间（哈希环）上，每个服务器也映射到这个哈希环上。客户端的请求会根据哈希值在哈希环上顺时针查找，遇到的第一个服务器就是该请求的目标服务器。
-2. **优点**
-3. 当服务器数量发生变化时，只有少数键需要被重新映射到新的服务器上，这大大减少了缓存失效的数量，提高了系统的可用性。
-4. 具有良好的可扩展性，可以动态地添加或删除服务器。
-5. **缺点**
-6. 在哈希环偏斜的情况下，大部分的缓存对象很有可能会缓存到一台服务器上，导致缓存分布极度不均匀。
-7. 实现较为复杂，需要引入虚拟节点等技术来解决哈希偏斜问题。
-
-### **2.讲一讲一致性哈希算法？**
-
-一致性哈希算法的原理和优化，可以参考文章
-
-https://blog.csdn.net/zhanglu0223/article/details/100579254?spm=1001.2014.3001.5506
-
-### **3.限流算法有哪些？**
-
-常见的限流算法有4种：计数器法，滑动窗口算法，漏桶算法和令牌桶算法
-
-对于上面4种算法的详细介绍和优缺点比较可以参考
-
-https://javaguide.cn/high-availability/limit-request.html
-
-### **4.令牌桶算法如何实现的？**
-
-**令牌桶算法简介**	令牌桶是指一个限流容器，容器有最大容量，每秒或每100ms产生一个令牌（具体取决于机器每秒处理的请求数），当容量中令牌数量达到最大容量时，令牌数量也不会改变了，只有当有请求过来时，使得令牌数量减少（只有获取到令牌的请求才会执行业务逻辑），才会不断生成令牌
-
-**令牌桶算法限流范围：**假设令牌桶最大容量为n，每秒产生r个令牌
-
-平均速率：则随着时间推延，处理请求的平均速率越来越趋近于每秒处理r个请求，说明令牌桶算法可以控制平均速率
-
-瞬时速率：如果在一瞬间有很多请求进来，此时来不及产生令牌，则在一瞬间最多只有n个请求能获取到令牌执行业务逻辑，所以令牌桶算法也可以控制瞬时速率
-
-
-
-## 代理模式
-
-### 静态代理
-
-静态代理中，我们对目标对象的每个方法的增强都是手动完成的，非常不灵活（*比如接口一旦新增加方法，目标对象和代理对象都要进行修改*）且麻烦(*需要对每个目标类都单独写一个代理类*)。
-
-静态代理实现步骤:
-
-- 定义一个接口及其实现类；
-- 创建一个代理类同样实现这个接口
-- 将目标对象注入进代理类，然后在代理类的对应方法调用目标类中的对应方法。这样的话，我们就可以通过代理类屏蔽对目标对象的访问，并且可以在目标方法执行前后做一些自己想做的事情。
-
-### 动态代理
-
-动态代理的实现方式有两种，比如 **JDK 动态代理**、**CGLIB** **动态代理**等等。
-
-#### JDK 动态代理机制
-
-JDK 动态代理类使用步骤：
-
-- 定义一个接口及其实现类；
-- 自定义 `InvocationHandler` 并重写`invoke`方法，在 `invoke` 方法中我们会调用原生方法（被代理类的方法）并自定义一些处理逻辑；
-- 通过 `Proxy.newProxyInstance(ClassLoader loader,Class<?>[] interfaces,InvocationHandler h)` 方法创建代理对象；
-
-#### CGLIB 动态代理机制
-
-CGLIB 动态代理类使用步骤：
-
-- 定义一个类；
-- 自定义 `MethodInterceptor` 并重写 `intercept` 方法，`intercept` 用于拦截增强被代理类的方法，和 JDK 动态代理中的 `invoke` 方法类似；
-- 通过 `Enhancer` 类的 `create()`创建代理类；
-
-### 两种方式对比
-
-- **DK** **动态代理只能只能代理实现了接口的类，而** **CGLIB** **可以代理未实现任何接口的类。** 另外， CGLIB 动态代理是通过生成一个被代理类的子类来拦截被代理类的方法调用，因此不能代理声明为 final 类型的类和方法。
-- 大部分情况都是 JDK 动态代理效率更优秀。
-
-
-
-
-
-## **各种场景题**
-
-这方面一般是围绕着降级熔断重试 等等问题来回答，主要考察项目是否是自己做出来的，是否有对项目有过思考
-
-### **1.本地缓存怎么做的？能保证缓存和服务的一致性吗？**
-
-在客户端设计一个缓存层，每次调用服务时从缓存层中获取地址，避免直接调用注册中心，优化速度和资源
-
-可以。这里使用了zookeeper的监听机制，在服务节点上注册Watcher，当注册中心的服务地址发生改动时，Watcher会异步通知客户端的缓存层修改对应的地址，从而实现两者的一致性
-
-### **2.某个服务多个节点承压能力不一，怎么办？**
-
-​	前面学习过一致性哈希算法 就会知道，在一致性哈希算法中，使用虚拟节点对真实节点进行映射，并且能通过设置虚拟节点的个数 来控制该节点接收到请求的概率。
-
-​	所以在服务器负载能力不一致的情况下，我们可以在服务端将服务器的负载能力写入到注册中心中，客户端在进行负载均衡时会在注册中心中获取各服务器的能力，并设置对应的虚拟节点的数量，来控制流量的分发。
-
-​	这里可以拓展一下自适应负载均衡的实现
-
-### **3.网络抖动导致某个节点被下线了，过一会网络好了，考虑过这个问题吗？**
-
-当调用端发起的请求失败时，RPC 框架自身可以进行重试，再重新发送请求，通过这种方式保证系统的容错率；
-
-项目使用Google Guava这款性能强大且轻量的框架来实现失败重试的功能；
-
-### **4.每个服务都进行重试吗？**
-
-如果这个服务业务逻辑不是幂等的，比如插入数据操作，那触发重试的话会不会引发问题呢？
-
-会的。
-
-在使用 RPC 框架的时候，要确保被调用的服务的业务逻辑是幂等的，这样才能考虑根据事件情况开启 RPC 框架的异常重试功能
-
-所以，我们可以**设置一个白名单**，服务端在注册节点时，将幂等性的服务注册在白名单中，客户端在请求服务前，先去白名单中查看该服务是否为幂等服务，如果是的话使用重试框架进行调用
-
-白名单存放在zookeeper中（充当配置中心的角色）
-
-### **5.如果下游有一个服务的所有服务器都宕机了，该怎么做避免失败请求的大量堆积**
+### 1. **如果下游有一个服务的所有服务器都宕机了，该怎么做避免失败请求的大量堆积**
 
 ​	项目在客户端调用的链路头部设置了熔断器，当检测到失败次数超过阈值时，熔断器会变为关闭状态，阻止后续的请求；在一定时间后，熔断器变为半开状态，并根据之后请求的成功情况来决定是否阻止或放行请求
 
-### **6. 熔断器具体实现？**
-
-参考上一篇文章
-
-#### **7.   做RPC项目时，有遇见什么难点吗？举一个印象深刻的讲讲**
-
-我在做这个项目的时候，因为从缓存开始以及后面的限流熔断等等都是自己实现的，所以能说出来的很多。在面对这种提问的时候，需要以实现者的角度，从两个顺序来回答：1，考虑到了什么问题？2，用什么方式解决这个问题的。比如：因为思考到，大量请求打到一个节点上的流量问题，所以我查阅了限流的原理和实现，了解到了限流的四种常见算法，最后使用令牌桶算法实现了项目的限流降级。
-当然，去模拟实现者的角度，不如自己成为实现者，想到这个项目还有哪些优化角度并去实现（可以参考 todolist），这样你对项目的理解就会更加深入了，面对这种问题也会更有把握
 
 
+## 1. HTTP和RPC的区别
+
+- HTTP 和各类 RPC 协议是在 TCP 之上定义的应用层协议。纯裸 TCP 是能收发数据，但它是个无边界的数据流，**上层需要定义消息格式用于定义消息边界。**
+- **RPC 本质上不算是协议，而是一种调用方式，**而像 gRPC 和 Thrift 这样的具体实现，才是协议，它们是实现了 RPC 调用的协议。目的是希望程序员能像调用本地方法那样去调用远端的服务方法。同时 **RPC 有很多种实现方式，不一定非得基于 TCP 协议。**
+- 从发展历史来说，HTTP 主要用于 B/S 架构，而 RPC 更多用于 C/S 架构。但现在其实已经没分那么清了，B/S 和 C/S 在慢慢融合。很多软件同时支持多端，**所以对外一般用 HTTP 协议，而内部集群的微服务之间则采用 RPC 协议进行通讯。**
+- **RPC 其实比 HTTP 出现的要早，且比目前主流的 HTTP/1.1 性能要更好，所以大部分公司内部都还在使用 RPC。**
+- HTTP/2.0 在 HTTP/1.1 的基础上做了优化，性能可能比很多 RPC 协议都要好，但由于是这几年才出来的，所以也不太可能取代掉 RPC。
+
+## 2. 项目是基于TCP还是HTTP来做的，为什么用TCP实现呢?
+
+我是使用TCP的，因为TCP更灵活，我可以自定义消息格式、编码方式、传输方式，HTTP 有较为固定的请求/响应格式，限制了灵活性
+
+而且TCP本身是双向的，允许客户端和服务器随时发送和接收数据，而 HTTP 是基于请求/响应的通信模式，服务器不能主动发送消息
+
+在高并发场景下，使用 TCP 长连接可以更好地管理连接池、保持会话和重用连接，减少资源消耗和延迟。
+HTTP 的设计更多是为 web 场景优化，而在纯粹的 RPC 调用中，TCP 的性能表现通常更优。
+
+## 3. RPC中出现异常如何处理？
+
+#### 客户端处理
+
+- **捕获异常**：在客户端调用远程服务时，应该捕获可能发生的异常，并进行适当的处理。
+- **重试机制**：对于某些临时性故障（如网络抖动），可以实现重试机制。
+- **异常转换**：将服务端抛出的异常转换为客户端可以理解和处理的形式。
+
+#### 服务端处理
+
+- **统一异常处理**：在服务端，可以使用统一的异常处理机制来处理所有异常
+- **业务逻辑异常**：对于业务逻辑中的异常，应该在服务端进行适当的处理，并返回合适的响应码和错误信息。
+
+### 日志记录
+
+- **记录异常信息**：无论是客户端还是服务端，都应该记录异常的相关信息，以便后续排查问题。
+
+## 4. Rpc难点？举一个印象深刻的讲讲
+
+我在做这个项目的时候，因为从缓存开始以及后面的限流熔断等等都是自己实现的，所以能说出来的很多。在面对这种提问的时候，需要以实现者的角度，从两个顺序来回答：1，考虑到了什么问题？2，用什么方式解决这个问题的。
+
+因为思考到，**大量请求打到一个节点上的流量问题，所以我查阅了限流的原理和实现，了解到了限流的四种常见算法，最后使用令牌桶算法实现了项目的限流降级。**
+
+
+## 5. 为什么要做这个项目，RPC框架的优势
+
+**远程过程调用**，比如，微服务项目：服务提供者和服务消费者运行在两台不同物理机上的不同进程内，它们之间的调用相比于本地方法调用，可称之为远程方法调用，内部集群的微服务之间则采用 RPC 协议进行通讯
+
+RPC框架一般使用长链接，不必每次通信都要3次握手，减少网络开销。
+
+## 6. Rpc框架中提到的两个BeanPostProcessor是做什么的？
+
+在RPC框架中提到的两个BeanPostProcessor通常用于增强Spring框架中的bean生命周期管理，特别是在服务注册与发现、服务代理生成以及拦截器注入等方面。以下是关于这两个BeanPostProcessor的主要功能和作用的文字描述：
+
+1. 服务暴露（Service Exporting）
+功能：自动注册服务提供者到服务注册中心。
+作用：当一个服务提供者在Spring容器中被初始化时，BeanPostProcessor可以识别出这是一个服务提供者，并自动将其相关信息注册到服务注册中心（如ZooKeeper）。这样，服务消费者就可以通过服务注册中心发现并调用这些服务提供者。
+2. 服务引用（Service Referencing）
+功能：自动引用服务消费者所需的远程服务。
+作用：当一个服务消费者在Spring容器中被初始化时，BeanPostProcessor可以识别出这是一个服务消费者，并自动从服务注册中心获取服务提供者的信息，并建立远程调用的连接。这样，服务消费者可以无缝地调用远程服务，就像调用本地服务一样。
+3. 代理生成（Proxy Generation）
+功能：生成服务消费者的代理对象。
+作用：在服务消费者初始化完成后，BeanPostProcessor可以生成一个代理对象，这个代理对象实际上是一个远程调用代理，它看起来像是本地对象，但实际上它会在远程调用服务提供者。通过这种方式，可以隐藏远程调用的细节，使服务消费者可以像调用本地方法一样调用远程服务。
+4. 拦截器注入（Interceptor Injection）
+功能：注入拦截器以增强服务调用逻辑。
+作用：BeanPostProcessor可以在bean初始化过程中注入拦截器，这些拦截器可以在远程调用前后执行一些逻辑，如日志记录、性能监控、异常处理等。通过这种方式，可以增强服务的调用逻辑，提高系统的健壮性和可维护性。
+综合应用
+在实际的RPC框架中，BeanPostProcessor的使用可以极大地简化服务注册与发现的过程，并且可以使服务消费者的实现更为简洁。通过在bean初始化的不同阶段注入特定的逻辑，可以实现服务的自动注册、自动引用、远程调用的代理生成以及调用逻辑的增强等功能，从而提高系统的灵活性和扩展性。
+
+总的来说，BeanPostProcessor在RPC框架中的应用主要集中在自动注册服务、自动引用服务、生成远程调用代理以及增强服务调用逻辑等方面，这些功能可以帮助开发者更轻松地实现服务的分布式调用和管理
 
 
 
 
 
+## TODO
 
 
-#### **2.   这个rpc的性能如何测试**
-
-用jmeter,然后去搜索  jmeter测试java请求  的相关博客看看。
-
-### RPC了解多少？都有哪些？
-
-- **user**（服务调用方）
-- **user-stub**（调用方的本地存根）
-- **RPCRuntime**（RPC通信者）
-- **server-stub**（服务端的本地存根）
-- **server**（服务端）
-
-**远程过程调用**，它是利用**网络**从远程计算机上请求服务，可以理解为把程序的一部分放在其他远程计算机上执行。通过**网络通信**将调用请求发送至远程计算机后，利用远程计算机的系统资源执行这部分程序，最终返回远程计算机上的执行结果。
-
-比如，微服务项目：服务提供者和服务消费者运行在两台不同物理机上的不同进程内，它们之间的调用相比于本地方法调用，可称之为远程方法调用，简称 RPC
-
-RPC框架有：Dubbo、GRPC、
 
 ### 介绍一下你的项目（你的RPC是怎么设计的）
 
-![image-20240812151605117](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20240812151605117.png)
+![image-20240812151605117](D:\2024\Notes\Typora\项目rpc+im\image-20240812151605117.png)
 
 #### 代理层
 
@@ -2732,47 +3151,11 @@ RPC框架有：Dubbo、GRPC、
 16. 客户端接收到服务器的响应后，Netty 会将字节流传递给 `RpcMessageDecode`，解码后得到 `RpcResponse` 对象
 17. 在接收到响应后，代理层会调用 `check` 方法来验证响应的合法性，如果验证通过，则返回结果数据
 
-
-
-### 为什么用Netty？Netty和Scoket的区别
-
-**socket**
-
-Socket编程主要涉及到客户端和服务端两个方面，首先是在服务器端创建一个服务器套接字(ServerSocket)，并把它附加到一个端口上，服务器从这个端口监听连接。
-
-客户端请求与服务器进行连接的时候，根据服务器的域名或者IP地址，加上端口号，打开一个套接字。当服务器接受连接后，服务器和客户端之间的通信就像输入输出流一样进行操作。
-
-**缺点**
-
-1. 需对传输的数据进行解析，转化成应用级的数据
-2. 对开发人员的开发水平要求高
-3. 相对于Http协议传输，增加了开发量
-
-**Netty**
-
-写入和 ChannelHandler 绑定的 ChannelHandlerContext 中，消息从 ChannelPipeline 中的下一个ChannelHandler 中移动
-
-### 为什么要做这个项目，RPC框架的优势
-
-**远程过程调用**，比如，微服务项目：服务提供者和服务消费者运行在两台不同物理机上的不同进程内，它们之间的调用相比于本地方法调用，可称之为远程方法调用，内部集群的微服务之间则采用 RPC 协议进行通讯
-
-RPC框架一般使用长链接，不必每次通信都要3次握手，减少网络开销。
-
-使用Nacos注册中心，有丰富的监控管理、发布、下线接口、动态扩展等，对调用方来说是无感知、统一化的操作、协议私密，安全性较高
-
 ### 在RPC项目中使用短连接有什么问题?如何实现长连接?
 
 由于采用TCP作为传输协议，所以若采用短连接，则每次传输都要建立连接和断开连接，有很多网络通信消耗，这和开发预期的高性能 RPC不符合。
 
 将服务端注册入Nacos 服务器中，而客户端每次都从Nacos 服务器中获取服务端地址，连接后将返回的 ChannelFuture存进一个set里，每次发送请求都从set从取出ChannelFuture发送信息，并且发送消息完毕后并不关闭连接，这就保证了客户端和服务端的长连接。
-
-### 项目是基于TCP还是HTTP来做的，为什么用TCP实现呢?
-
-我是使用TCP的，因为TCP更灵活，我可以自定义消息格式、编码方式、传输方式，HTTP 有较为固定的请求/响应格式，限制了灵活性
-
-而且TCP本身是双向的，允许客户端和服务器随时发送和接收数据，而 HTTP 是基于请求/响应的通信模式，服务器不能主动发送消息
-
-在高并发场景下，使用 TCP 长连接可以更好地管理连接池、保持会话和重用连接，减少资源消耗和延迟。HTTP 的设计更多是为 web 场景优化，而在纯粹的 RPC 调用中，TCP 的性能表现通常更优。
 
 ### 同步阻塞调用性能瓶颈:有什么瓶颈?你是怎么解决的，怎么实现异步调用的?
 
@@ -2788,35 +3171,7 @@ Netty是基于NIO开发的，采用了异步非阻塞通信方式，本项目采
 
 当有业务消息时，无须心跳检测，可以由业务消息进行链路可用性检测。所以心跳消息往往是在链路空闲时发送的。使用ldleStateHandler实现心跳检测机制（netty自带）。
 
-### 什么叫做序列化?Java原生序列化有什么问题？使用Kryo和JAVA序列化速度的差异?
 
-序列化就是将**类对象编码成可在网络中传输的二进制数据**，
-
-jdk原生序列化有下面三个问题：
-
-1.Java序列化机制是Java内部的一种对象编解码技术，无法跨语言使用。例如对于异构系统之间的对接，Java序列化后的码流需要能够通过其他语言反序列化成原始对象(副本)，目前很难支持。
-
-2.相比于其他开源的序列化框架，Java序列化后的码流太大，无论是网络传输还是持久化到磁盘，都会导致额外的资源占用。
-
-3.序列化性能差，资源占用率高(主要是CPU资源占用高)。
-
-**为什么选Kryo**
-
-Kryo 是专门针对Java 语言序列化方式并且性能非常好，并且 Dubbo 官网的一篇文章中提到说推荐使用 Kryo 作为生产环境的序列化方式，Kryo 的序列化和反序列化速度非常快，序列化后的数据体积较小
-
-使用Kryo需要注意
-
-Kryo由于其变长存储特性并使用了字节码生成机制，拥有较高的运行速度和较小的字节码体积因为 Kryo 不是线程安全的。使用 ThreadLocal 来存储 Kryo 对象，一个线程一个 Kryo 实例。
-
-### Kryo和其他序列化方式的比较
-
-Hessian对java一些常见的对象类型不支持，如 Linked系列、Locale类等等
-
-Protobuf是由谷歌公司开发的数据语言，支持java、C++、python等多平台，序列化后体积较小，转化性能较高。但需要预编译IDL
-
-Protostuff不需要依赖IDL文件，可以直接对Java 领域对象进行反/序列化操作，在效率上跟 Protobuf差不多，生成的二进制格式和Protobuf是完全相同的，可以说是一个Java版本的 Protobuf序列化框架。但不支持null，也不支持单纯的 Map、List 集合对象,需要包在对象里面。
-
-Kryo可以有效处理 Java 的复杂对象结构，包括嵌套对象、集合等，且对循环引用和深层次对象有很好的支持，而且Dubbo 官网的一篇文章中提到说推荐使用 Kryo 作为生产环境的序列化方式
 
 ### 你是怎么基于动态代理进行的请求处理?用的哪一种?为什么使用这种?
 
@@ -2852,10 +3207,6 @@ Synchronized:重量级锁；volatile乐观锁CAS机制，通过引入wait和noti
 
 基于注解的服务调用方面，我将service的实现类标注了`@RpcService`注解，这是一个自定义注解，同时在Spring启动过程中会有一个`BeanPostProcessor`，对`@RpcService`注解标注的类进行处理，主要是将服务注册到服务提供者；而客户端则对 service的接口标注了`@RpcReference`，在`BeanPostProcessor`的实现类中对被 `@RpcReference`标注的接口完成方法与接口的映射，这样服务器的map和客户端的 map里关于方法和类名都是一致的，因比服务端可以知道该执行什么处理
 
-### 注册中心你是怎么实现的?用的什么?
-
-用的是Nacos，设置ip和端口号进行服务注册和发现
-
 ### 为什么RPC项目用Nacos作为注册中心?
 
 服务端可以将服务实例（包括 IP 地址、端口号等）注册到 Nacos，客户端可以从 Nacos 查询可用的服务实例列表，从而进行负载均衡和请求路由
@@ -2869,16 +3220,6 @@ Nacos 支持健康检查功能，能够监控服务实例的健康状态，自�
 Nacos会主动通知客户端，这个机制基于 **订阅-发布** 模型，当服务实例的状态发生变化时，Nacos 会通知所有订阅了该服务的客户端
 
 当服务实例的状态（如上线、下线、变更）发生变化时，Nacos 会向所有订阅该服务的客户端发送通知。通知内容包括服务实例的最新列表，这样客户端可以更新自己的服务实例缓存
-
-### RPC怎么解决粘包问题？-----自定义消息头
-
-我的解决办法是自定义消息头：
-
-![image-20240813150328363](D:\2024\Notes\Typora\项目rpc+im\Java手写RPC框架.assets\image-20240813150328363.png)
-
-我的消息头包括：魔法数(4B)、版本(1B)、消息长度(4B)、消息类型(1B)、压缩类型(1B)、序列化类型(1B)、请求Id(4B)
-
-魔法数主要是为了筛选来到服务端的数据包，有了这个魔数之后，服务端首先取出前面四个字节进行比对，能够在第一时间识别出这个数据包并非是遵循自定义协议的，也就是无效数据包，为了安全考虑可以直接关闭连接以节省资源
 
 
 
@@ -3143,11 +3484,19 @@ Netty 使用直接缓冲区来管理网络数据的内存，这样可以更精�
 
 代码调用`deregisterInstance()`，Nacos把服务注销掉
 
+rpc中使用事务该咋办
+rpc和mq区别 应用场景
+rpc这种模式和哪个设计模式比较相像
 
 
 
+https://www.nowcoder.com/share/jump/32217479793689980
 
 
+
+#### **2.   这个rpc的性能如何测试有没有测过自己rpc框架的并发量**
+
+用jmeter,然后去搜索  jmeter测试java请求  的相关博客看看。
 
 
 
