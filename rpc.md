@@ -1,3 +1,11 @@
+![image-20241022135723304](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241022135723304.png)
+
+![image-20241022135812653](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241022135812653.png)
+
+[知识星球是创作者连接铁杆粉丝，实现知识变现的工具。任何从事创作或艺术的人，例如艺术家、工匠、教师、学术研究、科普等，只要能获得一千位铁杆粉丝，就足够生计无忧，自由创作。社群管理、内容沉淀、链接粉丝等就在知识星球。-知识星球 (zsxq.com)](https://wx.zsxq.com/topic/181415282558822)
+
+[知识星球是创作者连接铁杆粉丝，实现知识变现的工具。任何从事创作或艺术的人，例如艺术家、工匠、教师、学术研究、科普等，只要能获得一千位铁杆粉丝，就足够生计无忧，自由创作。社群管理、内容沉淀、链接粉丝等就在知识星球。-知识星球 (zsxq.com)](https://wx.zsxq.com/topic/181415282558822)
+
 ## **基于Netty的RPC框架实现**
 
 - 项目简述：实现分布式场景下本地服务在RPC节点上的注册、发布与远程调用功能。
@@ -10,7 +18,7 @@
 
 2. 使用高性能网络框架Netty实现NIO网络通信，消费端复用 Channel 避免多次连接，提高性能。
 
-   **05 Netty框架引入、06 Netty**
+   **05 Netty框架引入**
 
    客户端连接后，保持Channel的长连接，而不是每次请求都新建连接，这样可以减少建立连接的开销
 
@@ -731,7 +739,7 @@ public class NettyRPCServerHandler extends SimpleChannelInboundHandler<RpcReques
 }
 ```
 
-### netty执行流程
+### Netty执行流程
 
 ![image-20241005112154217](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241005112154217-1729339753861-46.png)
 
@@ -741,23 +749,7 @@ public class NettyRPCServerHandler extends SimpleChannelInboundHandler<RpcReques
 - **服务端RpcServer接收--->NettyServerInitializer-->Decoder解码--->NettyRPCServerHandler ---->getResponse调用---> 返回结果**
 - **客户端接收--->NettyServerInitializer-->Decoder解码--->NettyRPCServerHandler处理结果并返回给上层**
 
-
-
-### **1.netty传输位于网络结构模型中的哪一层？**
-
-**传输层**
-
-Netty支持TCP和UDP等传输层协议，通过对这些协议的封装和抽象，Netty能够处理传输层的数据传输任务，如建立连接、数据传输和连接关闭等。
-
-Netty的EventLoop和EventLoopGroup等组件基于Java NIO的多路复用器（Selector），实现了高效的IO事件处理机制，这在一定程度上与传输层的数据传输和事件处理机制相呼应。
-
-**应用层**
-
-Netty提供了丰富的协议支持，如HTTP、WebSocket、SSL、Protobuf等，这些协议主要工作在应用层。Netty通过编解码器等组件，能够方便地在应用层对数据进行编解码，从而实现与应用层协议的交互。
-
-Netty的ChannelPipeline和ChannelHandler等组件构成了一个灵活的事件处理链，允许开发者在应用层自定义各种事件处理逻辑，如身份验证、消息加密、业务逻辑处理等。
-
-### **2.讲一讲netty在你项目中的作用和执行流程？**
+### **1. 讲一讲netty在你项目中的作用和执行流程？**
 
 **作用**：引用高性能网络框架netty，实现了高效的信息传输；抽象了Java NIO底层的复杂性，提供了简单易用的API，简化了网络编程；提供各种组件方便网络数据的处理
 
@@ -776,39 +768,13 @@ Netty的ChannelPipeline和ChannelHandler等组件构成了一个灵活的事件�
 11. 客户端接收到服务端的响应字节流后，通过Netty的解码器将字节流反序列化成响应消息。
 12. 客户端根据响应消息中的结果信息，进行相应的业务处理。
 
-### 3. 在RPC框架中如何处理异步调用？
+### 2. 什么是Netty
 
-Netty通过Channel和ChannelFuture来支持异步调用。**客户端发送请求后，会得到一个ChannelFuture对象，可以注册监听器来处理响应结果。**
+Netty是一个**异步**事件驱动的 **网络应用程序框架** 用于 快速开发 可维护的 高性能协议服务器和客户端。
 
-### 4. Netty是怎么实现长连接的
+Netty是目前所有NIO框架中性能最好的框架。
 
-在 Netty 中实现长连接（Long-Lived Connection）主要是通过以下几个方面来实现的：
-
-1. 异步非阻塞 IO
-
-Netty 基于 NIO（Non-blocking I/O）模型，使用异步非阻塞的方式处理网络通信。这意味着当一个连接建立后，Netty 会将读写操作放入事件循环（EventLoop）中处理，而不是直接阻塞当前线程。这样，即使在网络流量较大时，也能有效地利用线程资源。
-
-2. 心跳机制
-
-为了维持长连接的有效性，Netty 支持心跳机制（Heartbeat）。心跳机制通过定期发送心跳包来检测连接是否仍然活跃。如果一段时间内没有数据交换，心跳机制可以帮助检测连接是否正常，从而避免无效连接占用资源。
-
-3. 连接池
-
-虽然 Netty 本身并不是一个连接池框架，但它可以很容易地与连接池一起工作。连接池可以复用已经建立的连接，避免频繁地建立和销毁连接带来的性能损耗。Netty 的连接通常会在首次建立后一直保持活跃状态，直到显式关闭或达到生命周期的终点。
-
-4. 生命周期管理
-
-Netty 提供了连接的生命周期管理机制，包括连接的建立、激活、去激活和关闭等阶段。通过这些阶段，可以方便地进行连接状态的监控和管理。
-
-5. 优雅关闭
-
-Netty 支持优雅地关闭连接，这通常通过 ChannelFutureListener 的 onCloseComplete 方法来实现。当一个连接不再需要时，可以通过 ChannelFuture 的 sync() 方法等待关闭操作完成，确保所有相关资源都被正确释放。
-
-6. ChannelHandler
-
-Netty 的 ChannelHandler 机制使得开发者可以方便地添加自定义处理逻辑来处理连接相关的事件，如连接建立、数据接收、异常处理等。这些处理逻辑可以帮助维护长连接的稳定性和有效性。
-
-### 5. 为什么用Netty？Netty和Scoket的区别
+### 3. Netty和Scoket的区别
 
 **socket**
 
@@ -827,11 +793,386 @@ Socket编程主要涉及到客户端和服务端两个方面，
 
 写入和 ChannelHandler 绑定的 ChannelHandlerContext 中，消息从 ChannelPipeline 中的下一个ChannelHandler 中移动
 
+### **4. Netty传输位于网络结构模型中的哪一层？**
+
+**传输层**
+
+Netty支持TCP和UDP等传输层协议，通过对这些协议的封装和抽象，Netty能够处理传输层的数据传输任务，如建立连接、数据传输和连接关闭等。
+
+Netty的EventLoop和EventLoopGroup等组件基于Java NIO的多路复用器（Selector），实现了高效的IO事件处理机制，这在一定程度上与传输层的数据传输和事件处理机制相呼应。
+
+**应用层**
+
+Netty提供了丰富的协议支持，如HTTP、WebSocket、SSL、Protobuf等，这些协议主要工作在应用层。Netty通过编解码器等组件，能够方便地在应用层对数据进行编解码，从而实现与应用层协议的交互。
+
+Netty的ChannelPipeline和ChannelHandler等组件构成了一个灵活的事件处理链，允许开发者在应用层自定义各种事件处理逻辑，如身份验证、消息加密、业务逻辑处理等。
+
+### 5. Netty应用场景
+
+在分布式系统中，各个节点之间需要远程服务调用，高性能的Rpc框架必不可少。Netty作为异步高性能的通信框架，往往作为基础通信组件被使用。
+
+Netty 主要⽤来做**⽹络通信**：
+
+1. **作为 RPC 框架的⽹络通信⼯具**：⽐如我调⽤另外⼀个节点的⽅法的话，⾄少是要让对知道我调⽤的是哪个类中的哪个⽅法以及相关参数吧
+2. 可以聊天类似微信的即时通讯系统
+3. **实现消息推送系统**：比如市面上的像Nacos，RocketMQ、Dubbo
+
+### 6. Netty特点
+
+Netty对JDK自带的NIO的API进行了封装，解决了原生NIO（NIO类库和API复杂、需要熟悉多线程和网络编程、开发工作量和难度大、JDK NIO bug）的问题。
+
+1. 设计
+
+- 适用于各种传输类型的统一 API - 阻塞和非阻塞套接字
+
+  Netty提供了**统一的API**，无论你是在使用阻塞还是非阻塞套接字，都可以**通过相同的编程接口**进行操作。这意味着开发者不需要关心底层的网络通信细节，只需要专注于业务逻辑即可。
+
+- 基于灵活且可扩展的事件模型，允许明确分离关注点
+
+  即事件发生时**触发相应的处理器**进行处理。这种模式允许开发者明确地分离关注点，比如**将网络IO操作和业务逻辑分开**，从而提高代码的清晰度和可维护性。此外，由于事件模型是可扩展的，所以你可以轻松地添加**自定义的处理器**来处理特定的事件。
+
+- 高度可定制的线程模型 - 单线程、一个或多个线程池 Netty允许开发者自由地定制线程模型，可以选择**单线程或多线程方案，甚至可以使用线程池**来处理并发请求。
+
+- 真正的无连接数据报套接字支持 Netty不仅支持传统的面向连接的TCP协议，**还支持无连接的UDP协议。**
+
+2. 易用性
+
+> 有据可查的 Javadoc、用户指南和示例无需额外依赖，JDK 5 （Netty 3.x） 或 6 （Netty 4.x） 就足够了
+
+​	    3. 性能
+
+> 更高的吞吐量，更低的延迟。减少资源消耗最小化不必要的内存复制
+
+4. 安全
+
+> 完整的SSL/TLS和StartTLS支持
+
+### 7. :star: JavaIO模型（阻塞非阻塞、同步异步）
+
+**阻塞和非阻塞是进程在访问数据的时候，数据是否准备就绪的一种处理方式.**
+
+**阻塞**：往往需要等待缓冲区中的数据准备好过后才处理其他的事情，否则一直等待在那里。
+
+**非阻塞**:当我们的进程访问我们的数据缓冲区的时候，如果数据没有准备好则直接返回，不会等待。如果数据已经准备好，也直接返回
+
+**同步和异步都是基于应用程序和操作系统处理 IO 事件所采用的方式。**
+
+**同步**方式在处理 IO 事件的时候，必须阻塞在某个方法上面等待我们的 IO 事件完成（**阻塞 IO 事件**或者通过**轮询 IO事**件的方式），对于**异步**来说，所有的 IO 读写都交给了操作系统。这个时候，我们可以去做其他的事情，并不需要去完成真正的 IO 操作，当操作完成 IO 后，会给我们的应用程序一个通知。
 
 
-## 06 Netty
 
-### redis，nginx，netty 是依赖什么做的这么高性能？（多Reactor多进程、单Reactor单进程 Reactor）
+java支持三种网络编程模式IO模式：BIO、NIO、AIO
+
+| **BIO** | **同步并阻塞** | 服务器实现模式为一个连接一个线程                 | 客户端有**连接请求**时服务器端就需要**启动一个线程**进行处理，如果这个连接不做任何事情会造成**不必要的线程开销。（可以通过线程池机制改善（实现多个客户连接服务器））** | 连接**数目比较小且固定**的架构             | 对服务器资源要求比较高，并发局限于应用 | 可靠性差， 吞吐量低 |
+| ------- | -------------- | ------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------ | -------------------------------------- | ------------------- |
+| **NIO** | **同步非阻塞** | 服务器实现模式为**一个线程**处理多个请求（连接） | 客户端发送的连接请求都会**注册到多路复用器**上，多路复用器**轮询到连接有 I/O 请求就进行处理**。 | 连接**数目多且连接比较短**（轻操作）的架构 | 聊天服务器，弹幕系统，服务器间通讯     | 可靠性好， 吞吐量高 |
+| AIO     | **异步非阻塞** | 有效的请求才启动线程                             | 先由操作系统完成后才通知服务端程序启动线程去处理，一般适用于连接数较多且连接时间较长的应用。 | 连接**数目多且连接比较长**（重操作）的架构 |                                        | 可靠性好， 吞吐量高 |
+
+NIO的设计思想与操作系统提供的多路复用机制非常相似，实际上Java的NIO中的Selector就是用来实现多路复用的。当你使用Java NIO时，实际上是利用了底层操作系统提供的多路复用能力，例如通过epoll机制来同时监听多个channel的状态变化。
+
+#### NIO和BIO的比较
+
+- BIO 以流的方式处理数据，而 NIO 以块的方式处理数据，块 I/O 的效率比流 I/O 高很多。
+- BIO 是阻塞的，NIO 则是非阻塞的。
+- **BIO 基于字节流和字符流**进行操作，而 **NIO 基于 Channel（通道）和 Buffer（缓冲区）进行操作**，数据总是从通道读取到缓冲区中，或者从缓冲区写入到通道中。**Selector（选择器）用于监听多个通道的事件**（比如：连接请求，数据到达等），因此使用单个线程就可以监听多个客户端通道。
+
+#### BIO
+
+![image-20241023081248817](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081248817.png)
+
+工作机制
+
+一个服务端对应一个客户端，对应一个线程
+
+- **服务器端**启动一个**ServerSocket**（来监听客户端连接需求）。默认情况下服务器端需要对**每一个客户建立一个线程**与之通讯
+- **客户端**启动**socke**t对服务器进行通讯。
+- 客户端发出请求后，先咨询服务器是否**有线程响应**，如果没有则会等待，或者被拒绝。
+- 如果有响应，客户端线程会等待**请求结束后**，在继续执行
+
+问题分析
+
+- 每个**请求都需要创建独立的线程**，与对应的客户端进行数据 Read，业务处理，数据 Write
+- 当**并发数较大**时，需要创建大量线程来处理连接，系统资源占用较大
+- 连接建立后，如果当前线程暂时没有数据可读，则**线程就阻塞在 Read 操作上**，造成线程资源浪费
+
+#### NIO
+
+NIO 提供了与传统 BIO 模型中的 `Socket` 和 `ServerSocket` 相对应的 `SocketChannel` 和 `ServerSocketChannel` 两种不同的套接字通道实现,两种通道都支持阻塞和非阻塞两种模式
+
+![image-20241023081305143](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081305143.png)
+
+简要说明
+
+- NIO 有三大核心部分**: Channel（通道）、Buffer（缓冲区）、Selector（选择器）**
+- NIO 是**面向缓冲区**，或者面向块编程的。数据读取到一个**它稍后处理的缓冲区，需要时可在缓冲区中前后移动**，这就增加了处理过程中的灵活性，使用它可以提供非阻塞式的高伸缩性网络
+- 使一个线程从某通道发送请求或者读取数据，但是它仅能得到目前可用的数据，如果目前没有数据可用时，就什么都不会获取，而不是保持线程阻塞，**所以直至数据变的可以读取之前，该线程可以继续做其他的事情**。非阻塞写也是如此，一个线程请求写入一些数据到某通道，但**不需要等待它完全写入，这个线程同时可以去做别的事情。**
+- 通俗理解：NIO 是可以做到用一个线程来处理多个操作的。假设有 10000 个请求过来,根据实际情况，可以分配 50 或者 100 个线程来处理。不像之前的阻塞 IO 那样，非得分配 10000 个。
+
+**2.2.3 NIO核心组件**
+
+![image-20241023081320744](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081320744.png)
+
+- 每个Thread对应一个selector选择器，一个selector选择器对应多个通道channel，每个Channel 都会对应一个 Buffer
+- 程序(Selector) 对应一个线程，一个线程对应多个连接（channel）,该图反应了有三个 Channel 注册到该 Selector
+- 程序切换到哪个 Channel 是由事件决定的，Event 就是一个重要的概念
+- Selector 会根据不同的事件，在各个通道上切换。
+- Buffer 就是一个内存块，底层是有一个数组。
+- 数据的读取写入是通过 Buffer，这个和 BIO，BIO 中要么是输入流，或者是输出流，不能双向，但是 NIO 的 Buffer 是可以读也可以写，需要 flip 方法切换 Channel 是双向的，可以返回底层操作系统的情况，比如 Linux，底层的操作系统通道就是双向的
+
+2.2.4 Selector（选择器）
+
+1.Java 的 NIO，用非阻塞的 IO 方式。**可以用一个线程，处理多个的客户端连接，就会使用到 Selector**（选择器）。 2.Selector 能够**检测**多个注册的**通道上**是否有**事件**发生（注意：多个 Channel **以事件的方式可以注册**到同一个 Selector），如果有事件发生，便获取事件然后针对每个事件进行相应的处理。这样就可以只用一个单线程去管理多个通道，也就是管理多个连接和请求。 3.只有在连接/通道**真正有读写事件发生时，才会进行读写**，就大大地减少了系统开销，并且不必为每个连接都创建一个线程，不用去维护多个线程。 4.避免了多线程之间的上下文切换导致的开销。
+
+2.2.5 Channel（通道）
+
+1.NIO 的通道类似于流，但有些区别如下：
+
+- 通道可以**同时进行读写**，而流只能读或者只能写 通道可以实现**异步读写**数据 通道可以**从缓冲读数据，也可以写数据到缓冲:**
+
+2.BIO 中的 Stream 是**单向**的，例如 FileInputStream 对象只能进行读取数据的操作，而 NIO 中的通道（Channel）是**双向**的，可以读操作，也可以写操作。 3.Channel 在 NIO 中是一个接口 public interface **Channel** extends Closeable{} 4.常用的 Channel 类有: FileChannel、DatagramChannel、ServerSocketChannel 和 SocketChannel 。**【ServerSocketChanne 类似 ServerSocket、SocketChannel 类似 Socket】**FileChannel 用于文件的数据读写，DatagramChannel 用于 UDP 的数据读写，ServerSocketChannel 和 SocketChannel 用于 TCP 的数据读写。
+
+2.2.6 Buffer（缓冲区）
+
+缓冲区本质上是一个可以读写数据的**内存块**，可以理解成是一个容器对象（含数组），该对象提供了一组方法，可以更轻松地使用内存块，，缓冲区对象内置了一些机制，能够跟踪和记录缓冲区的状态变化情况。Channel 提供从文件、网络读取数据的渠道，但是读取或写入的数据都必须经由 Buffer。
+
+![image-20241023081340458](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081340458.png)
+
+#### NIO非阻塞网络编程原理分析图
+
+![image-20241023081348402](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081348402.png)
+
+
+
+#### 同步
+
+应用程序要直接参与 IO 读写的操作
+
+![image-20241023081722046](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081722046.png)
+
+#### 异步
+
+所有的 IO 读写交给操作系统去处理，应用程序只需要等待通知
+
+![](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081722046-1729642651270-34.png)
+
+#### Netty高性能架构
+
+- 不同的线程模式很能影响程序的性能，目前的线程模式有：
+
+  - **传统阻塞I/O服务模型**
+
+  - Reactor模式
+
+    （根据
+
+    Reactor的数量
+
+    和
+
+    处理资源池线程数量
+
+    的不同，有三种典型实现）
+
+    - 单Reactor单线程
+    - 单Reactor多线程
+    - 主从Reactor多线程
+      - Netty线程模式 主要基于主从Reactor多线程模式做了一定改进
+
+- BIO、NIO分别对应了不同的IO处理方式，是底层IO机制，传统阻塞IO服务模式和Reactor模式是基于这些IO机制的具体服务设计模式。
+
+##### 传统阻塞IO服务模型
+
+![image-20241023081802757](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081802757.png)
+
+##### Reactor模式
+
+针对传统阻塞IO服务模式两个缺点的解决方案：
+
+- IO复用
+
+  多个**连接共用一个阻塞对象（事件选择器Selector）**，应用程序只需要在一个阻塞对象等待，**无需阻塞等待所有连接**，当某个**连接有新的数据**可以处理时，操作系统通知应用程序，**线程从阻塞状态返回，开始进行业务处理**。
+
+  Reactor对应的叫法：
+
+  - 反应器模式
+  - 分发者模式 dispatcher
+  - 通知者模式 notifier
+
+- 线程复用
+
+  基于**线程池**复用线程资源：不必再为每个连接创建线程，将连接完成后的业务处理任务分配给线程进行处理，**一个线程可以处理多个连接**的业务。
+
+![image-20241023082041986](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082041986.png)
+
+Reactor模式基本设计思想：IO复用结合线程池
+
+###### Reactor模式核心组成
+
+- Reactor
+
+  Reactor在一个单独的线程中运行，负责监听和分发事件，分发给适当的处理程序来对IO事件作出反应
+
+- Handlers
+
+  处理程序执行IO事件要完成的实际事件
+
+###### 单Reactor单线程
+
+![image-20241023082116719](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082116719.png)
+
+- **Select** 是前面 I/O 复用模型介绍的标准网络编程 API，可以实现**应用程序**通过**一个阻塞对象监听多路连接请求**
+- **Reactor** 对象通过 **Select 监控**客户端请求事件，收到事件后通过 **Dispatch** 进行**分发**
+- 如果是**建立连接请求**事件，则由 **Acceptor 通过 Accept 处理连接**请求，然后**创建一个 Handler 对象**处理连接完成后的后续业务处理
+- 如果不是建立连接事件，则 Reactor 会分发调**用连接对应的 Handler 来**响应
+- Handler 会完成 Read → 业务处理 → Send 的完整业务流程
+
+服务器端用一个线程通过多路复用搞定所有的 IO 操作（包括连接，读、写等），编码简单，清晰明了，但是**如果客户端连接数量较多，将无法支撑**，前面的 NIO 案例就属于这种模型。
+
+###### 单Reactor多线程
+
+![image-20241023082129302](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082129302.png)
+
+- Reactor 对象通过 Select 监控客户端请求事件，收到事件后，通过 Dispatch 进行分发
+- 如果建立连接请求，则右 Acceptor 通过 accept 处理连接请求，然后创建一个 Handler 对象处理完成连接后的各种事件
+- 如果不是连接请求，则由 Reactor 分发调用连接对应的 handler 来处理
+- handler **只负责响应事件，不做具体的业务处理**，通过 **read 读取数据后，会分发给后面的 worker 线程池的某个线程处**理业务
+- **worker 线程池会分配独立线程**完成真正的业务**，并将结果返回给 handler**
+- **handler** 收到响应后，通过 **send 将结果返回给 client**
+
+###### 主从Reactor多线程
+
+⼀组 NIO 线程负责接受请求，⼀组 NIO 线程处理 IO 操作
+
+![image-20241023082153193](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082153193.png)
+
+![image-20241023082203226](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082203226.png)
+
+- Reactor **主线程 MainReactor** 对象通过 select 监听连接事件，收到事件后，通过 Acceptor 处理连接事件
+- 当 Acceptor 处理连接事件后，**MainReactor 将连接分配给 SubReactor**
+- **subreactor 将连接加入到连接队列进行监听**，并创建 handler 进行各种事件处理
+- 当有新事件发生时，subreactor 就会调用对应的 handler 处理
+- handler 通过 read 读取数据，分发给后面的 worker 线程处理
+- worker 线程池分配独立的 worker 线程进行业务处理，并返回结果
+- handler 收到响应的结果后，再通过 send 将结果返回给 client
+- **Reactor 主线程**可以对应**多个 Reactor 子线程**，即 **MainRecator 可以关联多个 S**ubReactor
+
+##### Netty模式
+
+![image-20241023082214261](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082214261.png)
+
+![image-20241023082222194](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082222194.png)
+
+- Netty 抽象出**两组线程池** **BossGroup** 专门负责**接收客户端的连接**，**WorkerGroup** 专门**负责网络的读写**
+
+- BossGroup 和 WorkerGroup 类型都是 **NioEventLoopGroup**
+
+- NioEventLoopGroup相当于一个
+
+  事件循环组，这个组中含有多个事件循环，每一个事件循环是 NioEventLoop
+
+  - NioEventLoop 表示一个**不断循环的执行处理任务**的**线程**，**每个 NioEventLoop 都有一个 Selecto**r**，用于监听绑定在其上的 socket 的网络通讯**
+  - NioEventLoopGroup 可以**有多个线程**，即可以**含有多个 NioEventLoop**
+
+- 每个 
+
+  BossNioEventLoop
+
+   循环执行的步骤
+
+  有 3 步
+
+  - **轮询** accept 事件
+  - **处理** accept 事件，与 client **建立连接**，**生成 NioScocketChannel，\**并将其\**注册到**某个 **worker** NIOEventLoop 上的 **Selector**
+  - **处理任务队列的任务，**即 runAllTasks
+
+- 每个 Worker NIOEventLoop 循环执行的步骤
+
+  - **轮询** read，write 事件
+  - **处理** I/O 事件，即 read，write 事件，在对应 **NioScocketChannel 处理**
+  - **处理任务队列的任务**，即 runAllTasks
+
+- 每个 Worker NIOEventLoop 处理业务时，**会使用 pipeline（管道）**，pipeline **中包含了 channel**，即通过 pipeline 可以**获取到对应通道，管道中维护了很多的处理器**。
+
+### 8. Netty 的核心组件？
+
+![12c86600e657d3f3243bae92cd63566](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/12c86600e657d3f3243bae92cd63566.png)
+
+ **Selector**
+
+Netty 基于 **Selector 对象实现 I/O 多路复用**，通过 Selector **一个线程可以监听多个连接的 Channel 事件**。 当向一个 **Selector 中注册 Channel 后**，Selector 内部的机制就可以**自动不断地查询（Select）\**这些注册的 Channel 是否\**有已就绪的 I/O 事件**（例如可读，可写，网络连接完成等），这样程序就可以很简单地使用一个线程高效地管理多个 Channel。
+
+**Bytebuf（字节容器）**
+
+⽹络通信最终都是通过字节流进⾏传输的。 `ByteBuf` 就是 Netty 提供的⼀个字节容器，其内部是⼀个字节数组。 当我们通过 Netty 传输数据的时候，就是通过 `ByteBuf `进⾏的，可以将 `ByteBuf `看作是 Netty 对 `ByteBuffer` 字节容器的封装和抽象
+
+**Bootstrap 和 ServerBootstrap（启动引导类）**
+
+Netty 中 Bootstrap 类是客户端程序的启动引导类，ServerBootstrap 是服务端启动引导类。
+
+Bootstarp 和 ServerBootstrap 被称为引导类，指对应用程序进行配置，并使他运行起来的过程。Netty处理引导的方式是使你的应用程序和网络层相隔离。
+
+Bootstrap 是客户端的引导类，Bootstrap 在调用 bind()（连接UDP）和 connect()（连接TCP）方法时，会新创建一个 Channel，仅创建一个单独的、没有父 Channel 的 Channel 来实现所有的网络交换。
+
+ServerBootstrap 是服务端的引导类，ServerBootstarp 在调用 bind() 方法时会创建一个 ServerChannel 来接受来自客户端的连接，并且该 ServerChannel 管理了多个子 Channel 用于同客户端之间的通信。
+
+1. `Bootstrap` 通常使⽤ `connect()` ⽅法连接到远程的主机和端⼝，作为⼀个 Netty TCP 协议通信中的客户端
+2. `ServerBootstrap` 通常使⽤ `bind()` ⽅法绑定本地的端⼝上，然后等待客户端的连接
+3. `Bootstrap` 只需要配置⼀个线程组 `EventLoopGroup` ,⽽ `ServerBootstrap` 需要配置两个线程组`EventLoopGroup` ，⼀个⽤于接收连接，⼀个⽤于具体的 IO 处理。第一个EventLoopGroup通常只有一个EventLoop，通常叫做bossGroup，负责客户端的连接请求
+
+**Channel（⽹络操作抽象类）**
+
+`Channel` 接⼝是 Netty 对⽹络操作抽象类。通过 `Channel` 我们可以进⾏ I/O 操作。
+
+Netty 网络通信的组件，能够用于执行网络 I/O 操作。通过 Channel 可**获得当前网络连接的通道的状态**；通过 Channel 可获得**网络连接的配置参数**（例如接收缓冲区大小）。 Channel 提供**异步的网络 I/O 操作**(如**建立连接，读写，绑定端口**)，异步调用意味着任何 I/O 调用都将**立即返回**，并且不保证在调用结束时所请求的 I/O 操作已完成。调用立即**返回一个 ChannelFuture 实例**，通过**注册监听器到 ChannelFuture 上**，可以 I/O 操作成功、失败或取消时回调通知调用方。支持**关联** I/O **操作与对应的处理程序**。
+
+Channel是 Java NIO 的一个基本构造。可以看作是传入或传出数据的载体。因此，它可以被打开或关闭，连接或者断开连接。
+
+**EventLoop（事件循环）**
+
+`EventLoop`的主要作⽤实际就是责监听⽹络事件并调⽤事件处理器进⾏相关 I/O 操作（读写）的处理
+
+![image-20241020175726559](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241020175726559.png)
+
+**Netty-`NioEventLoopGroup` 默认的构造函数会起多少线程呢？**
+
+`NioEventLoopGroup` 默认的构造函数实际会起的线程数为 `CPU核⼼数*2`
+
+**ChannelHandler（消息处理器） 和 ChannelPipeline（ChannelHandler 对象链表）**
+
+`ChannelHandler`是消息的具体处理器，主要负责处理客户端/服务端接收和发送的数据，当`Channel` 被创建时，它会被⾃动地分配到它专属的 `ChannelPipeline`
+
+ 当`ChannelHandler` 被添加到的 `ChannelPipeline` 它得到⼀个 `ChannelHandlerContext` ，它代表⼀个` ChannelHandler` 和 `ChannelPipeline` 之间的"绑定"
+
+ChannelHandler **是一个接口**，**处理 I/O 事件或拦截 I/O 操作**，并将其转**发到其 ChannelPipeline（业务处理链）中的下一个处理程序。** ChannelHandler 本身并没有提供很多方法，因为这个接口有许多的方法需要实现，方便使用期间，可以继承它的子类 我们经常需**要自定义一个 Handler 类去继承 ChannelInboundHandlerAdapte**r，然后通过重写相应方法实现业务逻辑。
+
+**ChannelPipeline 是一个 Handler 的集合**，它负**责处理和拦截 inbound 或者 outbound** 的事件和操作，相当于一个贯穿 Netty 的链。（也可以这样理解：**ChannelPipeline 是保存 ChannelHandler 的 List，用于处理或拦截 Channel 的入站事件和出站操作**）ChannelPipeline 实现了一种**高级形式的拦截过滤器模式**，使用户可以完全控制事件的处理方式，以及 Channel 中各个的 ChannelHandler 如何相互交互。在 Netty **中每个 Channel 都有且仅有一个 ChannelPipeline 与之对应**，它们的组成关系如图。
+
+Future、**ChannelFuture（操作执⾏结果）**
+
+Netty 中所有的 IO 操作都是异步的，不能立刻得知消息是否被正确处理。但是可以过一会等它执行完成或者直接注册一个监听，具体的实现就是通过 Future 和 ChannelFutures，他们可以注册一个监听，当操作执行成功或失败时监听会自动触发注册的监听事件。
+
+可以通过 `ChannelFuture` 接⼝的 `addListener()` ⽅法注册⼀个` ChannelFutureListener `，当操作执⾏成功或者失败时，监听就会⾃动触发返回结果
+
+**ChannelHandlerContext**
+
+存 Channel 相关的所有上下文信息，同时关联一个 ChannelHandler 对象。即 ChannelHandlerContext 中包含一个具体的事件处理器 ChannelHandler，同时 ChannelHandlerContext 中也绑定了对应的 pipeline 和 Channel 的信息，方便对 ChannelHandler 进行调用。
+
+### 9. Netty 线程模型？
+
+Netty 主要靠 `NioEventLoopGroup` 线程池来实现具体的线程模型的
+
+实现服务端的时候，⼀般会初始化两个线程组：
+
+- `bossGroup`：接收连接
+- `workerGroup`：负责具体的处理，交由对应的 `Handler` 处理
+
+单线程模型：`eventGroup`既用于处理客户端连接，又负责具体的处理
+
+单线程模型：⼀个 Acceptor 线程只负责监听客户端的连接，⼀个 NIO 线程池负责具体处理
+
+主从多线程模型：从⼀个 主线程 NIO 线程池中选择⼀个线程作为 `Acceptor` 线程，绑定监听端⼝，接收客户端连接的连接，其他线程负责后续的接⼊认证等⼯作。连接建⽴完成后`SubNIO `线程池负责具体处理 I/O 读写
+
+### 10. redis，nginx，netty 是依赖什么做的这么高性能？（多Reactor多进程、单Reactor单进程 Reactor）
 
 主要是依赖**Reactor 模式**，也就是来了一个事件，Reactor 就有相对应的反应/响应
 
@@ -872,80 +1213,11 @@ nginx是多 Reactor 多进程方案，不过方案与标准的多 Reactor 多进
 优势：
 
 - 主线程和子线程分工明确，主线程只负责接收新连接，子线程负责完成后续的业务处理
-- 主线程和子线程的交互很简单，主线程只需要把新连接传给子线程，子线程无须返回数据，直接就可以在子线程将处理结果发送给客户端
+- 主线程和子线程的交互很简单，主线程只需要把新连接传给子线程，子线程无须返回数据，直接就可以在子线程将处理结果发送给客户端。
 
-### Netty是什么
 
-1. Netty 是⼀个 **基于 NIO** 的 client-server(客户端服务器)框架，使⽤它可以快速简单地开发⽹络应⽤程序。
-2. 它极⼤地简化并优化了 TCP 和 UDP 套接字服务器等⽹络编程,并且性能以及安全性等很多⽅⾯甚⾄都要更好。
 
-### BIO,NIO 和 AIO？（阻塞IO/非阻塞IO）
-
-- **BIO：** 同步阻塞 I/O 模式，数据的读取写⼊必须阻塞在⼀个线程内等待其完成
-- **NIO**：同步⾮阻塞的 I/O 模型，线程不断地轮询调用 `read` 操作来判断是否有数据，提供了 Channel , Selector ， Buffer等抽象
-- **AIO**：异步⾮阻塞的 IO 模型，当后台处理完成，操作系统会通知相应的线程进⾏后续的操作
-
-### 直接用 NIO和用 Netty？（Netty的优势）
-
-对编程功底要求⽐较⾼，⽽且，NIO 在⾯对断连重连、包丢失、粘包等问题时处理过程⾮常复杂。Netty相对来说有这些优势
-
-- 统⼀的 API，⽀持多种传输类型，阻塞和⾮阻塞的
-- 简单⽽强⼤的线程模型
-- ⾃带编解码器解决 TCP 粘包/拆包问题
-- 安全性不错，有完整的 SSL/TLS 以及 StartTLS ⽀持
-- ⽐直接使⽤ Java 核⼼ API 有更⾼的吞吐量、更低的延迟、更低的资源消耗和更少的内存复制
-
-### Netty 应用场景？
-
-Netty 主要⽤来做**⽹络通信**：
-
-1. **作为 RPC 框架的⽹络通信⼯具**：⽐如我调⽤另外⼀个节点的⽅法的话，⾄少是要让对知道我调⽤的是哪个类中的哪个⽅法以及相关参数吧
-2. 可以聊天类似微信的即时通讯系统
-3. **实现消息推送系统**：比如市面上的像Nacos，RocketMQ、Dubbo
-
-### Netty 的核心组件？
-
- **Selector**
-
-Netty 基于 **Selector 对象实现 I/O 多路复用**，通过 Selector **一个线程可以监听多个连接的 Channel 事件**。 当向一个 **Selector 中注册 Channel 后**，Selector 内部的机制就可以**自动不断地查询（Select）\**这些注册的 Channel 是否\**有已就绪的 I/O 事件**（例如可读，可写，网络连接完成等），这样程序就可以很简单地使用一个线程高效地管理多个 Channel。
-
-**Bytebuf（字节容器）**
-
-⽹络通信最终都是通过字节流进⾏传输的。 `ByteBuf` 就是 Netty 提供的⼀个字节容器，其内部是⼀个字节数组。 当我们通过 Netty 传输数据的时候，就是通过 `ByteBuf `进⾏的，可以将 `ByteBuf `看作是 Netty 对 `ByteBuffer` 字节容器的封装和抽象
-
-**Bootstrap 和 ServerBootstrap（启动引导类）**
-
-1. `Bootstrap` 通常使⽤ `connect()` ⽅法连接到远程的主机和端⼝，作为⼀个 Netty TCP 协议通信中的客户端
-2. `ServerBootstrap` 通常使⽤ `bind()` ⽅法绑定本地的端⼝上，然后等待客户端的连接
-3. `Bootstrap` 只需要配置⼀个线程组 `EventLoopGroup` ,⽽ `ServerBootstrap` 需要配置两个线程组`EventLoopGroup` ，⼀个⽤于接收连接，⼀个⽤于具体的 IO 处理。第一个EventLoopGroup通常只有一个EventLoop，通常叫做bossGroup，负责客户端的连接请求
-
-**Channel（⽹络操作抽象类）**
-
-`Channel` 接⼝是 Netty 对⽹络操作抽象类。通过 `Channel` 我们可以进⾏ I/O 操作。
-
-**EventLoop（事件循环）**
-
-`EventLoop`的主要作⽤实际就是责监听⽹络事件并调⽤事件处理器进⾏相关 I/O 操作（读写）的处理
-
-![image-20241020175726559](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241020175726559.png)
-
-**ChannelHandler（消息处理器） 和 ChannelPipeline（ChannelHandler 对象链表）**
-
-`ChannelHandler`是消息的具体处理器，主要负责处理客户端/服务端接收和发送的数据，当`Channel` 被创建时，它会被⾃动地分配到它专属的 `ChannelPipeline`
-
- 当`ChannelHandler` 被添加到的 `ChannelPipeline` 它得到⼀个 `ChannelHandlerContext` ，它代表⼀个` ChannelHandler` 和 `ChannelPipeline` 之间的"绑定"
-
-**ChannelFuture（操作执⾏结果）**
-
-Netty 中所有的 I/O 操作都为异步的，我们不能⽴刻得到操作是否执⾏成功
-
-可以通过 `ChannelFuture` 接⼝的 `addListener()` ⽅法注册⼀个` ChannelFutureListener `，当操作执⾏成功或者失败时，监听就会⾃动触发返回结果
-
-### Netty-`NioEventLoopGroup` 默认的构造函数会起多少线程呢？
-
-`NioEventLoopGroup` 默认的构造函数实际会起的线程数为 `CPU核⼼数*2`
-
-### `Reactor`/`Proactor`(非阻塞同步网络模式/异步网络模式)
+### 11. `Reactor`/`Proactor`(非阻塞同步网络模式/异步网络模式)
 
 ![image-20241020175746722](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241020175746722.png)
 
@@ -954,26 +1226,16 @@ Netty 中所有的 I/O 操作都为异步的，我们不能⽴刻得到操作是
 
 Reactor 可以理解为「来了事件操作系统通知应用进程，让应用进程来处理」，而 Proactor 可以理解为「来了事件操作系统来处理，处理完再通知应用进程」
 
-### 主从多线程 Reactor
+### 12. Netty-零拷贝
 
-⼀组 NIO 线程负责接受请求，⼀组 NIO 线程处理 IO 操作
+Netty 中的零拷贝与操作系统层面上的不太一样，操作系统通过mmap或者sendfile来实现，Netty的零拷贝完全是在用户态层面的，他更偏向于优化数据操作这样的概念
 
-### Netty 线程模型？
+- Netty 提供了 `CompositeByteBuf` 类，它可以将多个 ByteBuf 合并为一个逻辑上的 ByteBuf，避免了各个 ByteBuf 之间的拷贝
+- 通过 wrap 操作，我们可以将 byte[] 数组、ByteBuf、ByteBuffer等包装成一个 Netty ByteBuf 对象，进而避免了拷贝操作
+- ByteBuf 支持 slice 操作，因此可以将 ByteBuf 分解为多个共享同一个存储区域的 ByteBuf，避免了内存的拷贝
+- 通过 `FileRegion` 包装的`FileChannel.tranferTo` 实现文件传输，可以直接将文件缓冲区的数据发送到目标 `Channel`，避免了传统通过循环 write 方式导致的内存拷贝问题
 
-Netty 主要靠 `NioEventLoopGroup` 线程池来实现具体的线程模型的
-
-实现服务端的时候，⼀般会初始化两个线程组：
-
-- `bossGroup`：接收连接
-- `workerGroup`：负责具体的处理，交由对应的 `Handler` 处理
-
-单线程模型：`eventGroup`既用于处理客户端连接，又负责具体的处理
-
-单线程模型：⼀个 Acceptor 线程只负责监听客户端的连接，⼀个 NIO 线程池负责具体处理
-
-主从多线程模型：从⼀个 主线程 NIO 线程池中选择⼀个线程作为 `Acceptor` 线程，绑定监听端⼝，接收客户端连接的连接，其他线程负责后续的接⼊认证等⼯作。连接建⽴完成后`SubNIO `线程池负责具体处理 I/O 读写
-
-### Netty 服务端和客户端的启动过程？（Netty启动过程）
+### 13. Netty 服务端和客户端的启动过程？（Netty启动过程）
 
 **服务端**
 
@@ -992,7 +1254,11 @@ Netty 主要靠 `NioEventLoopGroup` 线程池来实现具体的线程模型的
 5. 通过 `.childHandler()` 给引导类创建⼀个 `ChannelInitializer` ，然后指定了客户端消息的业务处理逻辑 `HelloClientHandler` 对象
 6. 调⽤ `Bootstrap` 类的 `connect()` ⽅法设定好ip和端口进⾏连接
 
-### Netty 长连接、心跳机制了解么?
+### 14. 在RPC框架中如何处理异步调用？
+
+Netty通过Channel和ChannelFuture来支持异步调用。**客户端发送请求后，会得到一个ChannelFuture对象，可以注册监听器来处理响应结果。**
+
+### 15. Netty 长连接、心跳机制了解么?
 
 **TCP长连接和短链接**
 
@@ -1010,14 +1276,37 @@ TCP 在进行读写之前，`server` 与 `client`之间必须提前建立一个�
 
 TCP 实际上自带的就有长连接选项，本身是也有心跳包机制，也就是TCP的选项：`SO_KEEPALIVE`。但是，TCP 协议层面的长连接灵活性不够。所以，一般情况下我们都是在应用层协议上实现自定义心跳机制的，也就是在 Netty 层面通过编码实现。通过 Netty 实现心跳机制的话，核心类是 `IdleStateHandler`
 
-### Netty-零拷贝
+### 16. Netty是怎么实现长连接的
 
-Netty 中的零拷贝与操作系统层面上的不太一样，操作系统通过mmap或者sendfile来实现，Netty的零拷贝完全是在用户态层面的，他更偏向于优化数据操作这样的概念
+在 Netty 中实现长连接（Long-Lived Connection）主要是通过以下几个方面来实现的：
 
-- Netty 提供了 `CompositeByteBuf` 类，它可以将多个 ByteBuf 合并为一个逻辑上的 ByteBuf，避免了各个 ByteBuf 之间的拷贝
-- 通过 wrap 操作，我们可以将 byte[] 数组、ByteBuf、ByteBuffer等包装成一个 Netty ByteBuf 对象，进而避免了拷贝操作
-- ByteBuf 支持 slice 操作，因此可以将 ByteBuf 分解为多个共享同一个存储区域的 ByteBuf，避免了内存的拷贝
-- 通过 `FileRegion` 包装的`FileChannel.tranferTo` 实现文件传输，可以直接将文件缓冲区的数据发送到目标 `Channel`，避免了传统通过循环 write 方式导致的内存拷贝问题
+1. 异步非阻塞 IO
+
+Netty 基于 NIO（Non-blocking I/O）模型，使用异步非阻塞的方式处理网络通信。这意味着当一个连接建立后，Netty 会将读写操作放入事件循环（EventLoop）中处理，而不是直接阻塞当前线程。这样，即使在网络流量较大时，也能有效地利用线程资源。
+
+2. 心跳机制
+
+为了维持长连接的有效性，Netty 支持心跳机制（Heartbeat）。心跳机制通过定期发送心跳包来检测连接是否仍然活跃。如果一段时间内没有数据交换，心跳机制可以帮助检测连接是否正常，从而避免无效连接占用资源。
+
+3. 连接池
+
+虽然 Netty 本身并不是一个连接池框架，但它可以很容易地与连接池一起工作。连接池可以复用已经建立的连接，避免频繁地建立和销毁连接带来的性能损耗。Netty 的连接通常会在首次建立后一直保持活跃状态，直到显式关闭或达到生命周期的终点。
+
+4. 生命周期管理
+
+Netty 提供了连接的生命周期管理机制，包括连接的建立、激活、去激活和关闭等阶段。通过这些阶段，可以方便地进行连接状态的监控和管理。
+
+5. 优雅关闭
+
+Netty 支持优雅地关闭连接，这通常通过 ChannelFutureListener 的 onCloseComplete 方法来实现。当一个连接不再需要时，可以通过 ChannelFuture 的 sync() 方法等待关闭操作完成，确保所有相关资源都被正确释放。
+
+6. ChannelHandler
+
+Netty 的 ChannelHandler 机制使得开发者可以方便地添加自定义处理逻辑来处理连接相关的事件，如连接建立、数据接收、异常处理等。这些处理逻辑可以帮助维护长连接的稳定性和有效性。
+
+
+
+6. 
 
 ## 07 Zookeeper
 
@@ -1122,6 +1411,8 @@ Watcher（事件监听器），是 ZooKeeper 中的一个很重要的特性。Zo
 
 ![image-20241020175827979](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241020175827979.png)
 
+![image-20241023094610274](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023094610274.png)
+
 ### 6. 会话Session
 
 **Session 可以看作是 ZooKeeper 服务器与客户端的之间的一个 TCP 长连接**，通过这个连接，**客户端能够通过心跳检测与服务器保持有效的会话，也**能够向 ZooKeeper 服**务器发送请求并接受响应**，同时还能**够通过该连接接收来自服务器的 Watcher 事件通知。**
@@ -1180,17 +1471,136 @@ ZooKeeper 集群在宕掉几个 ZooKeeper 服务器之后，**如果剩下的 Zo
 
 ZooKeeper 的**过半机制导致不可能产生 2 个 leader，因为少于等于一半是不可能产生 leader 的，这就使得不论机房的机器如何分配都不可能发生脑裂。**
 
-### ------ZAB协议和Paxos算法-----
+### -----一致性问题----------
+
+**因为分区容忍性（partition tolerance）的存在，就必定要求我们需要在系统可用性（availability）和数据一致性（consistency）中做出权衡** 。这就是著名的 `CAP` 定理。
+
+Eureka 的处理方式，保证了 AP（可用性）； ZooKeeper 的处理方式，它保证了 CP（数据一致性）
+
+### 一致性协议和算法
+
+拜占庭将军问题 。它意指在不可靠信道上试图通过消息传递的方式达到一致性是不可能的， 所以所有的一致性算法的 必要前提 就是安全可靠的消息通道。
+
+### 1. 2PC（两阶段提交）
+
+两阶段提交是一种保证分布式系统数据一致性的协议，现在很多数据库都是采用的两阶段提交协议来完成分布式事务的处理。
+
+我们所需要解决的是在分布式系统中，整个调用链中，我们所有服务的数据处理要么都成功要么都失败，即所有服务的 原子性问题 。
+
+在两阶段提交中，主要涉及到两个角色，分别是协调者和参与者。
+
+- 第一阶段：当要执行一个分布式事务的时候，事务**发起者首先向协调者发起事务请求**，然后**协调者会给所有参与者发送 prepare 请求**（其中包括事务内容）告诉参与者你们需要执行事务了，如果能执行我发的事务内容那么就**先执行但不提交，执行后请给我回复**。然后参与者收到 prepare 消息后，他们会开始执行事务（但不提交），并将 Undo 和 Redo 信息记入事务日志中，之后参与者就向协调者反馈是否准备好了。
+- 第二阶段：**第二阶段主要是协调者根据参与者反馈的情况来决定接下来是否可以进行事务的提交操作，即提交事务或者回滚事务**。
+- 比如这个时候 **所有的参与者 都返回了准备好了的消息，这个时候就进行事务的提交，协调者此时会给所有的参与者发送 Commit 请求** ，当参与者收到 Commit 请求的时候会执行前面执行的事务的 提交操作 ，提交完毕之后将给协调者发送提交成功的响应。
+- 而如果在第一阶段并不是所有参与者都返回了准备好了的消息，那**么此时协调者将会给所有参与者发送 回滚事务的 rollback 请求**，参与者收到之后将会 回滚它在第一阶段所做的事务处理 ，然后再将处理情况返回给协调者，最终协调者收到响应后便给事务发起者返回处理失败的结果
+
+缺点：
+
+- 单点故障问题，如果**协调者挂**了那么整个系统都处于不可用的状态了。
+- 阻塞问题，即当协调者发送 prepare 请求，参与者收到之后如果能处理那么它将会进行事务的处理但并不提交，**这个时候会一直占用着资源不释放，如果此时协调者挂了，那么这些资源都不会再释放了**，这会极大影响性能。
+- 数据不一致问题，**比如当第二阶段，协调者只发送了一部分的 commit 请求就挂了，那么也就意味着，收到消息的参与者会进行事务的提交，而后面没收到的则不会进行事务提交，那么这时候就会产生数据不一致性问题**。
+
+### 2. 3PC（三阶段提交）
+
+- CanCommit 阶段：**协调者向所有参与者发送 CanCommit 请求，参与者收到请求后会根据自身情况查看是否能执行事务，如果可以则返回 YES 响应并进入预备状态，否则返回 NO** 。
+- PreCommit 阶段：协调者根据参与者返回的响应来决定是否可以进行下面的 PreCommit 操作。**如果上面参与者返回的都是 YES，那么协调者将向所有参与者发送 PreCommit 预提交请求，**参与者收到预提交请求后，会进行事务的**执行操作，并将 Undo 和 Redo 信息写入事务日志中 ，**最后如果参与者顺利执行了事务则给协调者返回成功的响应。如果在第一阶段协调者收到了 任何一个 NO 的信息，或者 在一定时间内 并没有收到全部的参与者的响应，那么就会中断事务，它会向所有参与者发送中断请求（abort），参与者收到中断请求之后会立即中断事务，或者在一定时间内没有收到协调者的请求，它也会中断事务。
+- DoCommit 阶段：这个阶段其实和 2PC 的第二阶段差不多，如果协调者收到了所有参与者在 PreCommit 阶段的 YES 响应，**那么协调者将会给所有参与者发送 DoCommit 请求，参与者收到 DoCommit 请求后则会进行事务的提交工作，完成后则会给协调者返回响应**，协调者收到所有参与者返回的事务提交成功的响应之后则完成事务。若**协调者在 PreCommit 阶段 收到了任何一个 NO 或者在一定时间内没有收到所有参与者的响应 ，那么就会进行中断请求的发送，参与者收到中断请求后则会 通过上面记录的回滚日志** 来进行事务的回滚操作，并向协调者反馈回滚状况，协调者收到参与者返回的消息后，中断事务。
+
+3PC 在很多**地方进行了超时中断的处理，**比如协调者在指定时间内未收到全部的确认消息则进行事务中断的处理，这样能 减少同步阻塞的时间 。还有需要注意的是，3PC 在 DoCommit 阶段参与者如未收到协调者发送的提交事务的请求，它会在一定时间内进行事务的提交。为什么这么做呢？是因为这个时候我们肯定保证了在第一阶段所有的协调者全部返回了可以执行事务的响应，这个时候我们有理由相信其他系统都能进行事务的执行和提交，所以不管协调者有没有发消息给参与者，进入第三阶段参与者都会进行事务的提交操作。
+
+但是最重要的一致性并没有得到根本的解决，比如在 **DoCommit 阶段，当一个参与者收到了请求之后其他参与者和协调者挂了或者出现了网络分区，这个时候收到消息的参与者都会进行事务提交，**这就会出现数据不一致性问题。
+
+### 3. Paxos算法
+
+Paxos 算法是基于消息传递且具有高度容错特性的一致性算法，是目前公认的解决分布式一致性问题最有效的算法之一，其解决的问题就是在分布式系统中如何就某个值（决议）达成一致 。
+在 Paxos 中主要有三个角色，**分别为 Proposer提案者、Acceptor表决者、Learner学习者**。Paxos 算法和 2PC 一样，也有两个阶段，分别为 Prepare 和 accept 阶段。
+
+对于 Learner 来说如何去学习 Acceptor 批准的提案内容，这有很多方式。
+
+**Prepare阶段**
+
+- Proposer提案者：负责提出 proposal，每个提案者在提出提案时都会**首先获取到一个 具有全局唯一性的、递增的提案编号 N，**即在整个集群中是唯一的编号 N，然后将该编号赋予其要提出的提案，**在第一阶段是只将提案编号发送给所有的表决者。**
+- Acceptor表决者：每个表决者在 accept 某提案后，会将该提案编号 N 记录在本地，这样每个表决者中保存的已经被 accept 的提案中会存在一个编号最大的提案，其编号假设为 maxN。**每个表决者仅会 accept 编号大于自己本地 maxN 的提案**，在批准提案时表决者会将以前接受过的最大编号的提案作为响应反馈给 Proposer
+
+![image-20241023091530361](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023091530361.png)
+
+**Accept阶段**
+
+- **当一个提案被 Proposer 提出后，如果 Proposer 收到了超过半数的 Acceptor 的批准（Proposer 本身同意），那么此时 Proposer 会给所有的 Acceptor 发送真正的提案**（你可以理解为第一阶段为试探），这个时候 Proposer 就会**发送提案的内容和提案编号。**
+
+- **表决者收到提案请求后会再次比较本身已经批准过的最大提案编号和该提案编号，如果该提案编号 大于等于 已经批准过的最大提案编号，那么就 accept 该提案**（此时执行提案内容但不提交），随后将情况返回给 Proposer 。如果不满足则不回应或者返回 NO 。
+
+- ![image-20241023091541244](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023091541244.png)
+
+- 当 Proposer **收到超过半数的 accept ，那么它这个时候会向所有的 acceptor 发送提案的提交请求**。需要注意的是，因为上述仅仅是超过半数的 acceptor 批准执行了该提案内容，其他没有批准的并没有执行该提案内容，**所以这个时候需要向未批准的 acceptor 发送提案内容和提案编号并让它无条件执行和提交**，而对于前面已经批准过该提案的 acceptor 来说 仅仅需要发送该提案的编号 ，让 acceptor **执行提交就行了。**
+
+  ![image-20241023091633721](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023091633721.png)
+
+- 而如果 Proposer 如果没有收到超过半数的 accept 那么它将会将 递增 该 Proposal 的编号，然后 重新进入 Prepare 阶段 。
+
+**Paxos的死循环问题**
+
+此时提案者 P1 提出一个方案 M1，完成了 Prepare 阶段的工作，这个时候 acceptor 则批准了 M1，但是此时提案者 P2 同时也提出了一个方案 M2，它也完成了 Prepare 阶段的工作。然后 P1 的方案已经不能在第二阶段被批准了（因为 acceptor 已经批准了比 M1 更大的 M2），所以 P1 自增方案变为 M3 重新进入 Prepare 阶段，然后 acceptor ，又批准了新的 M3 方案，它又不能批准 M2 了，这个时候 M2 又自增进入 Prepare 阶段。
+
+如何解决呢？很简单，我现在 就允许一个能提案 就行了。
+
+### 4. ZAB引出
 
 Paxos 算法应该可以说是 ZooKeeper 的灵魂了。**ZooKeeper 并没有完全采用 Paxos 算法 ，而是使用 ZAB 协议作为其保证数据一致性的核心算法**。ZAB 协议并不像 Paxos 算法那样，是一种通用的分布式一致性算法，它是一种特别为 Zookeeper 设计的崩溃可恢复的原子消息广播算法
 
 ZAB（ZooKeeper Atomic Broadcast，原子广播） 协议是为分布式协调服务 ZooKeeper 专门设计的一种支持崩溃恢复的原子广播协议。 在 ZooKeeper 中，主要依赖 ZAB 协议来实现分布式数据一致性，基于该协议，**ZooKeeper 实现了一种主备模式的系统架构来保持集群中各个副本之间的数据一致性**
 
-### ZAB协议的两种基本模式：崩溃恢复和消息广播
+**ZAB的三个角色（zookeeper集群角色那一节）**
+
+Leader 领导者、Follower跟随者、Observer观察者 。
+Leader：集群中 唯一的写请求处理者 ，能够发起投票（投票也是为了进行写请求）。
+Follower：能够接收客户端的请求，如果是读请求则可以自己处理，如果是写请求则要转发给 Leader 。在选举过程中会参与投票，有选举权和被选举权 。
+Observer：就是没有选举权和被选举权的 Follower 。
+在 ZAB 协议中对 zkServer(即上面我们说的三个角色的总称) 还有两种模式的定义，分别是 消息广播 和 崩溃恢复
+
+**ZAB协议的两种基本模式：崩溃恢复和消息广播**
 
 ZAB 协议包括两种基本的模式，分别是
-**崩溃恢复：**当整个服务框架在启动过程中，或是当 Leader 服务器出现网络中断、崩溃退出与重启等异常情况时，ZAB 协议就会进入恢复模式并选举产生新的 Leader 服务器。当选举产生了新的 Leader 服务器，同时集群中已经有过半的机器与该 Leader 服务器完成了状态同步之后，ZAB 协议就会退出恢复模式。其中，所谓的状态同步是指数据同步，用来保证集群中存在过半的机器能够和 Leader 服务器的数据状态保持一致。
-**消息广播：**当集群中已经有过半的 Follower 服务器完成了和 Leader 服务器的状态同步，那么整个服务框架就可以进入消息广播模式了。 当一台同样遵守 ZAB 协议的服务器启动后加入到集群中时，如果此时集群中已经存在一个 Leader 服务器在负责进行消息广播，那么新加入的服务器就会自觉地进入数据恢复模式：找到 Leader 所在的服务器，并与其进行数据同步，然后一起参与到消息广播流程中去。
+
+**崩溃恢复：**
+
+当整个服务框架在启动过程中，**或是当 Leader 服务器出现网络中断、崩溃退出与重启等异常情况时，ZAB 协议就会进入恢复模式并选举产生新的 Leader 服务器。**当选举产生了新的 Leader 服务器，同时集群中已经有过半的机器与该 Leader 服务器完成了状态同步之后，ZAB 协议就会退出恢复模式。其中，所谓的状态同步是指数据同步，用来保证集群中存在过半的机器能够和 Leader 服务器的数据状态保持一致。
+
+> 说到崩溃恢复我们首先要提到 ZAB 中的 Leader 选举算法，**当系统出现崩溃影响最大应该是 Leader 的崩溃，**因为我们只有一个 Leader ，所以当 Leader 出现问题的时候我们势必需要重新选举 Leader 。
+> Leader 选举可以分为两个不同的阶段，第一个是我们提到的 Leader 宕机需要重新选举，第二则是当 Zookeeper 启动时需要进行系统的 Leader 初始化选举。**下面我先来介绍一下 ZAB 是如何进行初始化选举的。**
+> 假设我们集群中有 3 台机器，那也就意味着我们需要两台以上同意（超过半数）。比如这个时候我们启动了 server1 ，它会首先 投票给自己 ，投票内容为服务器的 myid 和 ZXID ，因为初始化所以 ZXID 都为 0，此时 server1 发出的投票为 (1,0)。但此时 server1 的投票仅为 1，所以不能作为 Leader ，此时还在选举阶段所以整个集群处于 Looking 状态。
+> 接着 server2 启动了，它首先也会将投票选给自己(2,0)，并将投票信息广播出去（server1也会，只是它那时没有其他的服务器了），server1 在收到 server2 的投票信息后会将投票信息与自己的作比较。首先它会比较 ZXID ，ZXID 大的优先为 Leader，如果相同则比较 myid，myid 大的优先作为 Leader。所以此时server1 发现 server2 更适合做 Leader，它就会将自己的投票信息更改为(2,0)然后再广播出去，之后server2 收到之后发现和自己的一样无需做更改，并且自己的 投票已经超过半数 ，则 确定 server2 为 Leader，server1 也会将自己服务器设置为 Following 变为 Follower。整个服务器就从 Looking 变为了正常状态。
+> 当 server3 启动发现集群没有处于 Looking 状态时，它会直接以 Follower 的身份加入集群。
+> 还是前面三个 server 的例子**，如果在整个集群运行的过程中 server2 挂了，那么整个集群会如何重新选举 Leader 呢？其实和初始化选举差不多。**
+> 首先毫无疑问的是剩下的两个 Follower 会将自己的状态 从 Following 变为 Looking 状态 ，然后每个 server 会向初始化投票一样首先给自己投票（这不过这里的 zxid 可能不是 0 了，这里为了方便随便取个数字）。
+> 假设 server1 给自己投票为(1,99)，然后广播给其他 server，server3 首先也会给自己投票(3,95)，然后也广播给其他 server。server1 和 server3 此时会收到彼此的投票信息，和一开始选举一样，他们也会比较自己的投票和收到的投票（zxid 大的优先，如果相同那么就 myid 大的优先）。这个时候 server1 收到了 server3 的投票发现没自己的合适故不变，server3 收到 server1 的投票结果后发现比自己的合适于是更改投票为(1,99)然后广播出去，最后 server1 收到了发现自己的投票已经超过半数就把自己设为 Leader，server3 也随之变为 Follower。
+> 请注意 ZooKeeper 为什么要设置奇数个结点？比如这里我们是三个，挂了一个我们还能正常工作，挂了两个我们就不能正常工作了（已经没有超过半数的节点数了，所以无法进行投票等操作了）。而假设我们现在有四个，挂了一个也能工作，但是挂了两个也不能正常工作了，这是和三个一样的，而三个比四个还少一个，带来的效益是一样的，所以 Zookeeper 推荐奇数个 server 。
+> 那么说完了 ZAB 中的 Leader 选举方式之后我们再来了解一下 崩溃恢复 是什么玩意？
+> **其实主要就是 当集群中有机器挂了，我们整个集群如何保证数据一致性？**
+> 如果只是 Follower 挂了，而且挂的没超过半数的时候，因为我们一开始讲了在 Leader 中会维护队列，所以不用担心后面的数据没接收到导致数据不一致性。
+> **如果 Leader 挂了那就麻烦了，我们肯定需要先暂停服务变为 Looking 状态然后进行 Leader 的重新选举（上面我讲过了），但这个就要分为两种情况了，分别是 确保已经被 Leader 提交的提案最终能够被所有的 Follower 提交 和 跳过那些已经被丢弃的提案 。**
+> 确保已经被 Leader 提交的提案最终能够被所有的 Follower 提交是什么意思呢？
+> 假设 Leader (server2) 发送 commit 请求（忘了请看上面的消息广播模式），他发送给了 server3，然后要发给 server1 的时候突然挂了。这个时候重新选举的时候我们如果把 server1 作为 Leader 的话，那么肯定会产生数据不一致性，因为 server3 肯定会提交刚刚 server2 发送的 commit 请求的提案，而 server1 根本没收到所以会丢弃。
+> 崩溃恢复
+> 那怎么解决呢？
+> **聪明的同学肯定会质疑，这个时候 server1 已经不可能成为 Leader 了，因为 server1 和 server3 进行投票选举的时候会比较 ZXID ，而此时 server3 的 ZXID 肯定比 server1 的大了。(不理解可以看前面的选举算法)**
+> 那么跳过那些已经被丢弃的提案又是什么意思呢？
+> 假设 Leader (server2) 此时同意了提案 N1，自身提交了这个事务并且要发送给所有 Follower 要 commit 的请求，却在这个时候挂了，此时肯定要重新进行 Leader 的选举，比如说此时选 server1 为 Leader （这无所谓）。但是过了一会，这个 挂掉的 Leader 又重新恢复了 ，此时它肯定会作为 Follower 的身份进入集群中，**需要注意的是刚刚 server2 已经同意提交了提案 N1，但其他 server 并没有收到它的 commit 信息，所以其他 server 不可能再提交这个提案 N1 了，这样就会出现数据不一致性问题了，所以 该提案 N1 最终需要被抛弃掉 。**
+
+**消息广播：**
+
+当集群中已经有过半的 Follower 服务器完成了和 Leader 服务器的状态同步，那么整个服务框架就可以进入消息广播模式了。 当一台同样遵守 ZAB 协议的服务器启动后加入到集群中时，如果此时集群中已经存在一个 Leader 服务器在负责进行消息广播，那么新加入的服务器就会自觉地进入数据恢复模式：找到 Leader 所在的服务器，并与其进行数据同步，然后一起参与到消息广播流程中去。
+
+**第一步肯定需要 Leader 将写请求 广播 出去呀，让 Leader 问问 Followers 是否同意更新，如果超过半数以上的同意那么就进行 Follower 和 Observer 的更新（和 Paxos 一样）**
+
+![image-20241023093104320](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023093104320.png)
+
+- 两个 Queue 哪冒出来的？答案是 **ZAB 需要让 Follower 和 Observer 保证顺序性** 。何为顺序性，比如我现在有一个写请求 A，此时 Leader 将请求 A 广播出去，因为只需要半数同意就行，所以可能这个时候有一个 Follower F1 因为网络原因没有收到，而 Leader 又广播了一个请求 B，因为网络原因，F1 竟然先收到了请求 B 然后才收到了请求 A，这个时候请求处理的顺序不同就会导致数据的不同，从而 产生数据不一致问题 。
+
+  所以**在 Leader 这端，它为每个其他的 zkServer 准备了一个 队列 ，采用先进先出的方式发送消息**。由于协议是 通过 TCP 来进行网络通信的，保证了消息的发送顺序性，接受顺序性也得到了保证。
+
+- 在 ZAB 中还**定义了一个 全局单调递增的事务 ID ZXID ，**它是一个 64 位 long 型，其中高 32 位表示 epoch 年代，低 32 位表示事务 id。**epoch 是会根据 Leader 的变化而变化的，当一个 Leader 挂了，新的 Leader 上位的时候，年代（epoch）就变了。而低 32 位可以简单理解为递增的事务 id。**
+  定义这个的原因也是为了顺序性，**每个 proposal 在 Leader 中生成后需要 通过其 ZXID 来进行排序 ，才能得到处理。**
 
 ### ------Zookeeper和ETCD-------
 
@@ -1210,6 +1620,10 @@ ZAB 协议包括两种基本的模式，分别是
 |  权限校验   |                             ACL                              |                      RABC                       |
 |  事务能力   |                     提供了简易的事务能力                     |            只提供了版本号的检查能力             |
 |  部署维护   |                             复杂                             |                      简单                       |
+
+### Zookeeper的几个典型应用场景
+
+[ZooKeeper相关概念总结(进阶) | JavaGuide](https://javaguide.cn/distributed-system/distributed-process-coordination/zookeeper/zookeeper-plus.html#数据发布-订阅)
 
 ## 08 Zookeeper注册中心的引入
 
@@ -1533,12 +1947,12 @@ public class ZKServiceRegister implements ServiceRegister {
 
 <img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241019201246856.png" alt="image-20241019201246856" style="zoom: 33%;" />
 
-### **1.zookeeper在项目中的角色？你为什么使用zookeeper**
+### 1.zookeeper在项目中的角色？你为什么使用zookeeper
 
 1. zookeeper作为项目的注册中心，实现着服务注册，服务发现和维护服务状态的功能；
 2. zookeeper具有高可用性，一致性，有着丰富的api，应用广阔，很多大数据框架都有他的身影。
 
-### **2.  你为什么选择Zookeeper作为注册中心呢，为什么不用Nacos**
+### 2.  你为什么选择Zookeeper作为注册中心呢，为什么不用Nacos
 
 zookeeper 的特性就是强一致性，这个不好答，
 可以从另一个优点：成熟稳定来答。
@@ -1546,7 +1960,7 @@ zookeeper 的特性就是强一致性，这个不好答，
 在学习中发现 目前很多大数据应用如 **kafka，hadoop，hbase **
 **都是使用 zookeeper 来协调管理服务，所以我考虑采用了 zookeeper 作为注册中心**
 
-### **3. 注册中心的意义？**
+### 3. 注册中心的意义？
 
 ①服务注册与发现：注册中心实现了微服务架构中各个微服务的服务注册与发现，这是其最基础也是最重要的功能。通过注册中心，各个微服务可以将自己的地址信息（如IP地址、端口号等）注册到中心，同时也能够从中发现其他微服务的地址信息。
 
@@ -1968,7 +2382,7 @@ decoder 读取字节数组，获得里面的对象
 
 ![image-20240813150328363](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20240813150328363.png)
 
-我的消息头包括：魔法数(4B)、版本(1B)、消息长度(4B)、消息类型(1B)、压缩类型(1B)、序列化类型(1B)、请求Id(4B)
+我的消息头包括：魔法数(4B)、版本(1B)、**消息长度(4B)、消息类型(1B)**、压缩类型(1B)、序列化类型(1B)、请求Id(4B)
 
 魔法数主要是为了筛选来到服务端的数据包，有了这个魔数之后，服务端首先取出前面四个字节进行比对，能够在第一时间识别出这个数据包并非是遵循自定义协议的，也就是无效数据包，为了安全考虑可以直接关闭连接以节省资源
 
@@ -2138,35 +2552,77 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
 
 ### 3 . 什么叫做序列化?Java原生序列化有什么问题？使用Kryo和JAVA序列化速度的差异?
 
-序列化就是将**类对象编码成可在网络中传输的二进制数据**，
+序列化就是将**类对象编码成可在网络中传输的二进制数据**
 
 jdk原生序列化有下面三个问题：
 
-1.Java序列化机制是Java内部的一种对象编解码技术，**无法跨语言使用。例**如对于异构系统之间的对接，Java序列化后的码流需要能够通过其他语言反序列化成原始对象(副本)，目前很难支持。
-
-2.相比于其他开源的序列化框架，**Java序列化后的码流太大**，无论是网络传输还是持久化到磁盘，都会导致额外的资源占用。
-
-**3.序列化性能差**，资源占用率高(主要是CPU资源占用高)。
+- 1.Java序列化机制是Java内部的一种对象编解码技术，**无法跨语言使用。例**如对于异构系统之间的对接，Java序列化后的码流需要能够通过其他语言反序列化成原始对象(副本)，目前很难支持。
+- 2.相比于其他开源的序列化框架，**Java序列化后的码流太大**，无论是网络传输还是持久化到磁盘，都会导致额外的资源占用。
+- **3.序列化性能差**，资源占用率高(主要是CPU资源占用高)。
 
 **为什么选Kryo**
 
-Kryo 是专门针对Java 语言序列化方式并且性能非常好，并且 Dubbo 官网的一篇文章中提到说推荐使用 Kryo 作为生产环境的序列化方式，Kryo 的序列化和反序列化速度非常快，序列化后的数据体积较小
+```
+Kryo 是专门针对Java 语言序列化方式并且性能非常好，
+并且 Dubbo 官网的一篇文章中提到说推荐使用 Kryo 作为生产环境的序列化方式，
+Kryo 的序列化和反序列化速度非常快，序列化后的数据体积较小
 
-使用Kryo需要注意
+使用Kryo需要注意：
 
-Kryo由于其变长存储特性并使用了字节码生成机制，拥有较高的运行速度和较小的字节码体积因为 Kryo 不是线程安全的。使用 ThreadLocal 来存储 Kryo 对象，一个线程一个 Kryo 实例。
+Kryo由于其变长存储特性并使用了字节码生成机制，拥有较高的运行速度和较小的字节码体积
+因为 Kryo 不是线程安全的。使用 ThreadLocal 来存储 Kryo 对象，一个线程一个 Kryo 实例。
+```
 
 **Kryo和其他序列化方式的比较**
 
-**Hessian对java一些常见的对象类型不支持，如 Linked系列、Locale类等等**
+- **Hessian对java一些常见的对象类型不支持，如 Linked系列、Locale类等等**
+- Protobuf是由谷歌公司开发的数据语言，支持java、C++、python等多平台**，序列化后体积较小，转化性能较高。但需要预编译IDL**
 
-Protobuf是由谷歌公司开发的数据语言，支持java、C++、python等多平台**，序列化后体积较小，转化性能较高。但需要预编译IDL**
+- Protostuff不需要依赖IDL文件，可以直接对Java 领域对象进行反/序列化操作，在效率上跟 Protobuf差不多，生成的二进制格式和Protobuf是完全相同的，可以说是一个Java版本的 Protobuf序列化框架。但不支持null，也不支持单纯的 Map、List 集合对象,需要包在对象里面。
 
-Protostuff不需要依赖IDL文件，可以直接对Java 领域对象进行反/序列化操作，在效率上跟 Protobuf差不多，生成的二进制格式和Protobuf是完全相同的，可以说是一个Java版本的 Protobuf序列化框架。但不支持null，也不支持单纯的 Map、List 集合对象,需要包在对象里面。
+- **Kryo可以有效处理 Java 的复杂对象结构，包括嵌套对象、集合等，且对循环引用和深层次对象有很好的支持，而且Dubbo 官网的一篇文章中提到说推荐使用 Kryo 作为生产环境的序列化方式**
 
-**Kryo可以有效处理 Java 的复杂对象结构，包括嵌套对象、集合等，且对循环引用和深层次对象有很好的支持，而且Dubbo 官网的一篇文章中提到说推荐使用 Kryo 作为生产环境的序列化方式**
+**protostuff**
 
-
+1. 什么是 ProtoStuff?
+ProtoStuff 是一个 Java 序列化框架，它基于 Google 的 Protocol Buffers（简称 protobuf）协议。它提供了一种高效、灵活和易用的方式来将 Java 对象转换为字节流，并且可以在不同的系统之间进行传输和存储。
+2. 为什么需要 ProtoStuff?
+在分布式系统中，数据的序列化和反序列化是非常重要的环节。传统的 Java 序列化机制存在一些问题，比如序列化后的字节数量大、序列化性能低等。而 ProtoStuff 通过使用 protobuf 协议，可以解决这些问题，提供更高效的序列化和反序列化操作。
+3. ProtoStuff 的实现原理?
+ProtoStuff 的实现原理主要包括以下几个方面：
+Schema 定义：ProtoStuff 使用 Schema 来描述 Java 对象的结构信息，包括字段名称、类型等。Schema 可以通过编译.proto 文件生成，也可以通过运行时动态生成。
+序列化：当需要将 Java 对象序列化为字节流时，ProtoStuff 会根据对象的 Schema 将其转换为二进制格式。ProtoStuff 采用紧凑的二进制编码方式，使得序列化后的字节数量较小。
+反序列化：当需要将字节流反序列化为 Java 对象时，ProtoStuff 会根据对象的 Schema 将其转换为对应的 Java 对象。ProtoStuff 通过读取字节流中的字段信息，并根据 Schema 进行解析和赋值操作。
+4. ProtoStuff 的使用示例
+下面是一个简单的 ProtoStuff 使用示例：
+// 定义一个Java对象
+public class User {
+private String name;
+private int age;
+// 省略getter和setter方法
+}
+// 创建一个User对象
+User user = new User();
+user.setName("Alice");
+user.setAge(25);
+// 使用ProtoStuff将User对象序列化为字节数组
+byte[] data = ProtostuffIOUtil.toByteArray(user, RuntimeSchema.getSchema(User.class));
+// 使用ProtoStuff将字节数组反序列化为User对象
+User newUser = new User();
+ProtostuffIOUtil.mergeFrom(data, newUser, RuntimeSchema.getSchema(User.class));
+在上述示例中，我们首先定义了一个 User 类，然后创建了一个 User 对象并设置其属性。接着使用 ProtoStuff 的toByteArray方法将 User 对象序列化为字节数组，再使用mergeFrom方法将字节数组反序列化为新的 User 对象。
+5. ProtoStuff 的优点
+高性能：ProtoStuff 采用紧凑的二进制编码方式，序列化后的字节数量较小，从而提高了传输效率和存储空间利用率。
+灵活性：ProtoStuff 支持动态生成 Schema，可以适应不同类型的 Java 对象，并且可以处理新增或删除字段的情况。
+跨语言支持：ProtoStuff 使用 protobuf 协议，可以实现不同语言之间的数据交互和共享。
+6. ProtoStuff 的缺点
+依赖 Schema 定义：ProtoStuff 需要通过 Schema 来描述 Java 对象的结构信息，如果没有正确的 Schema 定义，将无法进行序列化和反序列化操作。
+不支持跨版本兼容：当 Java 对象的字段发生变化时，比如新增或删除字段，可能会导致旧版本的字节流无法正常反序列化。
+7. ProtoStuff 的使用注意事项
+在使用 ProtoStuff 进行序列化和反序列化时，要确保 Java 对象的类定义是稳定的，并且与对应的 Schema 一致。
+当需要处理复杂类型（如 List、Map 等）时，需要额外处理，可以使用 ProtostuffIOUtil提供的方法进行序列化和反序列化。
+8. 总结
+ProtoStuff 是一个高性能的 Java 序列化框架，基于 protobuf 协议实现。它通过紧凑的二进制编码方式和灵活的 Schema 定义，提供了高效、灵活和易用的序列化和反序列化操作。然而，使用 ProtoStuff 需要注意正确定义 Schema 以及处理跨版本兼容性的问题
 
 ### 4. Rpc中的数据安全是如何实现的
 
