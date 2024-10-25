@@ -1,4 +1,4 @@
-![image-20241022135723304](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241022135723304.png)
+ ![image-20241022135723304](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241022135723304.png)
 
 ![image-20241022135812653](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241022135812653.png)
 
@@ -84,16 +84,23 @@
 - 远程通信协议：RMI、Socket、SOAP(HTTP XML)、REST(HTTP JSON)。
 - 通信框架：MINA 和 Netty
 
+### dubbo和你的rpc框架？你怎么评价他们的差异？
+
+- Dubbo 是一个成熟的分布式服务框架，支持多种注册中心，如 Zookeeper、Nacos、Consul 等，并且可以选择不同的序列化机制。Dubbo 拥有一个庞大的社区和生态系统，有大量的开源插件和扩展支持
+- 基本的 RPC 功能，包括服务注册、发现、序列化和反序列化、以及客户端与服务端的通信。虽然功能上较为基础，但它为你提供了更大的灵活性，可以根据具体需求进行深度定制。与 Dubbo 相比，你的框架可能更轻量化，但需要在功能和稳定性上进行更多的开发与测试。
+
 ### Dubbo
 
 Apache Dubbo 是一款微服务框架，为大规模微服务实践提供高性能 RPC 通信、流量治理、可观测性等解决方案，涵盖 Java、Golang 等多种语言 SDK 实现
 
 Dubbo 提供了从服务定义、服务发现、服务通信到流量管控等几乎所有的服务治理能力，支持 Triple 协议（基于 HTTP/2 之上定义的下一代 RPC 通信协议）、应用级服务发现、Dubbo Mesh （Dubbo3 赋予了很多云原生友好的新特性）等特性。
 
-Dubbo 是由阿里开源，后来加入了 Apache 。正是由于 Dubbo 的出现，才使得越来越多的公司开始使用以及接受分布式架构。
+ Dubbo 是由阿里开源，后来加入了 Apache 。正是由于 Dubbo 的出现，才使得越来越多的公司开始使用以及接受分布式架构。
 
 - Github ：https://github.com/apache/incubator-dubbo
 - 官网：https://dubbo.apache.org/zh/
+
+[Dubbo 介绍 | Apache Dubbo](https://cn.dubbo.apache.org/zh-cn/overview/what/)
 
 ### Motan
 
@@ -101,7 +108,7 @@ Motan 更像是一个精简版的 Dubbo，可能是借鉴了 Dubbo 的思想，M
 
 ### gRPC
 
-gRPC 是 Google 开源的一个高性能、通用的开源 RPC 框架。其由主要面向移动应用开发并基于 HTTP/2 协议标准而设计（支持双向流、消息头压缩等功能，更加节省带宽），基于 ProtoBuf 序列化协议开发，并且支持众多开发语言。
+gRPC 是 Google 开源的一个高性能、通用的开源 RPC 框架。其由主要面向移动应用开发并基于 HTTP/2 协议标准而设计（支持双向流、消息头压缩等功能，更加节省带宽），**基于 ProtoBuf 序列化协议开发**，并且支持众多开发语言。
 
 **何谓 ProtoBuf？** [ProtoBuf（ Protocol Buffer）](https://github.com/protocolbuffers/protobuf) 是一种更加灵活、高效的数据格式，可用于通讯协议、数据存储等领域，基本支持所有主流编程语言且与平台无关。不过，通过 ProtoBuf 定义接口和数据类型还挺繁琐的，这是一个小问题。
 
@@ -145,8 +152,6 @@ Dubbo 和 Motan 主要是给 Java 语言使用。虽然，Dubbo 和 Motan 目前
 10. 客户端接收响应
 11. 客户端接收到服务端的响应字节流后，通过Netty的解码器将字节流反序列化成响应消息。
 12. 客户端根据响应消息中的结果信息，进行相应的业务处理。
-
-
 
 ## 04 如何实现一个基本的rpc调用？
 
@@ -213,7 +218,7 @@ CGLIB 动态代理类使用步骤：
 
 #### 两种方式对比
 
-- **JDK** **动态代理只能只能代理实现了接口的类，而** **CGLIB** **可以代理未实现任何接口的类。** 另外， CGLIB 动态代理是通过生成一个被代理类的子类来拦截被代理类的方法调用，因此不能代理声明为 final 类型的类和方法。
+- **JDK** **动态代理只能代理实现了接口的类，而** **CGLIB** **可以代理未实现任何接口的类。** 另外， CGLIB 动态代理是通过生成一个被代理类的子类来拦截被代理类的方法调用，因此不能代理声明为 final 类型的类和方法。
 - 大部分情况都是 JDK 动态代理效率更优秀。
 
 
@@ -521,7 +526,6 @@ RpcResponse response= IOClient.sendRequest(host,port,request);
 
 ```java
 public interface RpcClient {
-    
     //定义底层通信的方法
     RpcResponse sendRequest(RpcRequest request);
 }
@@ -781,7 +785,7 @@ Netty是目前所有NIO框架中性能最好的框架。
 Socket编程主要涉及到客户端和服务端两个方面，
 首先是在服务器端创建一个服务器套接字(ServerSocket)，并把它附加到一个端口上，服务器从这个端口监听连接。
 
-客户端请求与服务器进行连接的时候，根据服务器的域名或者IP地址，加上端口号，打开一个套接字。当服务器接受连接后，服务器和客户端之间的通信就像输入输出流一样进行操作。
+**客户端请求与服务器进行连接的时候，根据服务器的域名或者IP地址，加上端口号，打开一个套接字。当服务器接受连接后，服务器和客户端之间的通信就像输入输出流一样进行操作。**
 
 **缺点**
 
@@ -799,11 +803,11 @@ Socket编程主要涉及到客户端和服务端两个方面，
 
 Netty支持TCP和UDP等传输层协议，通过对这些协议的封装和抽象，Netty能够处理传输层的数据传输任务，如建立连接、数据传输和连接关闭等。
 
-Netty的EventLoop和EventLoopGroup等组件基于Java NIO的多路复用器（Selector），实现了高效的IO事件处理机制，这在一定程度上与传输层的数据传输和事件处理机制相呼应。
+**Netty的EventLoop和EventLoopGroup等组件基于Java NIO的多路复用器（Selector），**实现了高效的IO事件处理机制，这在一定程度上与传输层的数据传输和事件处理机制相呼应。
 
 **应用层**
 
-Netty提供了丰富的协议支持，如HTTP、WebSocket、SSL、Protobuf等，这些协议主要工作在应用层。Netty通过编解码器等组件，能够方便地在应用层对数据进行编解码，从而实现与应用层协议的交互。
+**Netty提供了丰富的协议支持，如HTTP、WebSocket、SSL、Protobuf等，这些协议主要工作在应用层。Netty通过编解码器等组件，能够方便地在应用层对数据进行编解码，从而实现与应用层协议的交互。**
 
 Netty的ChannelPipeline和ChannelHandler等组件构成了一个灵活的事件处理链，允许开发者在应用层自定义各种事件处理逻辑，如身份验证、消息加密、业务逻辑处理等。
 
@@ -851,13 +855,13 @@ Netty对JDK自带的NIO的API进行了封装，解决了原生NIO（NIO类库和
 
 **阻塞和非阻塞是进程在访问数据的时候，数据是否准备就绪的一种处理方式.**
 
-**阻塞**：往往需要等待缓冲区中的数据准备好过后才处理其他的事情，否则一直等待在那里。
-
-**非阻塞**:当我们的进程访问我们的数据缓冲区的时候，如果数据没有准备好则直接返回，不会等待。如果数据已经准备好，也直接返回
+- **阻塞**：往往需要等待缓冲区中的数据准备好过后才处理其他的事情，否则一直等待在那里。
+- **非阻塞**:当我们的进程访问我们的数据缓冲区的时候，如果数据没有准备好则直接返回，不会等待。如果数据已经准备好，也直接返回
 
 **同步和异步都是基于应用程序和操作系统处理 IO 事件所采用的方式。**
 
-**同步**方式在处理 IO 事件的时候，必须阻塞在某个方法上面等待我们的 IO 事件完成（**阻塞 IO 事件**或者通过**轮询 IO事**件的方式），对于**异步**来说，所有的 IO 读写都交给了操作系统。这个时候，我们可以去做其他的事情，并不需要去完成真正的 IO 操作，当操作完成 IO 后，会给我们的应用程序一个通知。
+- **同步**方式在处理 IO 事件的时候，必须阻塞在某个方法上面等待我们的 IO 事件完成（**阻塞 IO 事件**或者通过**轮询 IO事**件的方式），
+- 对于**异步**来说，所有的 IO 读写都交给了操作系统。这个时候，我们可以去做其他的事情，并不需要去完成真正的 IO 操作，当操作完成 IO 后，会给我们的应用程序一个通知。
 
 
 
@@ -878,7 +882,7 @@ NIO的设计思想与操作系统提供的多路复用机制非常相似，实�
 
 #### BIO
 
-![image-20241023081248817](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081248817.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081248817.png" alt="image-20241023081248817" style="zoom: 33%;" />
 
 工作机制
 
@@ -899,7 +903,7 @@ NIO的设计思想与操作系统提供的多路复用机制非常相似，实�
 
 NIO 提供了与传统 BIO 模型中的 `Socket` 和 `ServerSocket` 相对应的 `SocketChannel` 和 `ServerSocketChannel` 两种不同的套接字通道实现,两种通道都支持阻塞和非阻塞两种模式
 
-![image-20241023081305143](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081305143.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081305143.png" alt="image-20241023081305143" style="zoom: 33%;" />
 
 简要说明
 
@@ -910,7 +914,7 @@ NIO 提供了与传统 BIO 模型中的 `Socket` 和 `ServerSocket` 相对应的
 
 **2.2.3 NIO核心组件**
 
-![image-20241023081320744](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081320744.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081320744.png" alt="image-20241023081320744" style="zoom:50%;" />
 
 - 每个Thread对应一个selector选择器，一个selector选择器对应多个通道channel，每个Channel 都会对应一个 Buffer
 - 程序(Selector) 对应一个线程，一个线程对应多个连接（channel）,该图反应了有三个 Channel 注册到该 Selector
@@ -947,13 +951,13 @@ NIO 提供了与传统 BIO 模型中的 `Socket` 和 `ServerSocket` 相对应的
 
 应用程序要直接参与 IO 读写的操作
 
-![image-20241023081722046](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081722046.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081722046.png" alt="image-20241023081722046" style="zoom:33%;" />
 
 #### 异步
 
 所有的 IO 读写交给操作系统去处理，应用程序只需要等待通知
 
-![](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081722046-1729642651270-34.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081722046-1729642651270-34.png" style="zoom: 33%;" />
 
 #### Netty高性能架构
 
@@ -982,7 +986,7 @@ NIO 提供了与传统 BIO 模型中的 `Socket` 和 `ServerSocket` 相对应的
 
 ##### 传统阻塞IO服务模型
 
-![image-20241023081802757](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081802757.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023081802757.png" alt="image-20241023081802757" style="zoom:50%;" />
 
 ##### Reactor模式
 
@@ -1002,7 +1006,7 @@ NIO 提供了与传统 BIO 模型中的 `Socket` 和 `ServerSocket` 相对应的
 
   基于**线程池**复用线程资源：不必再为每个连接创建线程，将连接完成后的业务处理任务分配给线程进行处理，**一个线程可以处理多个连接**的业务。
 
-![image-20241023082041986](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082041986.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082041986.png" alt="image-20241023082041986" style="zoom:50%;" />
 
 Reactor模式基本设计思想：IO复用结合线程池
 
@@ -1018,7 +1022,7 @@ Reactor模式基本设计思想：IO复用结合线程池
 
 ###### 单Reactor单线程
 
-![image-20241023082116719](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082116719.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082116719.png" alt="image-20241023082116719" style="zoom:50%;" />
 
 - **Select** 是前面 I/O 复用模型介绍的标准网络编程 API，可以实现**应用程序**通过**一个阻塞对象监听多路连接请求**
 - **Reactor** 对象通过 **Select 监控**客户端请求事件，收到事件后通过 **Dispatch** 进行**分发**
@@ -1030,7 +1034,7 @@ Reactor模式基本设计思想：IO复用结合线程池
 
 ###### 单Reactor多线程
 
-![image-20241023082129302](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082129302.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082129302.png" alt="image-20241023082129302" style="zoom:50%;" />
 
 - Reactor 对象通过 Select 监控客户端请求事件，收到事件后，通过 Dispatch 进行分发
 - 如果建立连接请求，则右 Acceptor 通过 accept 处理连接请求，然后创建一个 Handler 对象处理完成连接后的各种事件
@@ -1043,9 +1047,9 @@ Reactor模式基本设计思想：IO复用结合线程池
 
 ⼀组 NIO 线程负责接受请求，⼀组 NIO 线程处理 IO 操作
 
-![image-20241023082153193](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082153193.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082153193.png" alt="image-20241023082153193" style="zoom:50%;" />
 
-![image-20241023082203226](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082203226.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082203226.png" alt="image-20241023082203226" style="zoom:50%;" />
 
 - Reactor **主线程 MainReactor** 对象通过 select 监听连接事件，收到事件后，通过 Acceptor 处理连接事件
 - 当 Acceptor 处理连接事件后，**MainReactor 将连接分配给 SubReactor**
@@ -1058,9 +1062,9 @@ Reactor模式基本设计思想：IO复用结合线程池
 
 ##### Netty模式
 
-![image-20241023082214261](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082214261.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082214261.png" alt="image-20241023082214261" style="zoom:50%;" />
 
-![image-20241023082222194](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082222194.png)
+<img src="https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20241023082222194.png" alt="image-20241023082222194" style="zoom: 50%;" />
 
 - Netty 抽象出**两组线程池** **BossGroup** 专门负责**接收客户端的连接**，**WorkerGroup** 专门**负责网络的读写**
 
@@ -1228,12 +1232,12 @@ Reactor 可以理解为「来了事件操作系统通知应用进程，让应用
 
 ### 12. Netty-零拷贝
 
-Netty 中的零拷贝与操作系统层面上的不太一样，操作系统通过mmap或者sendfile来实现，Netty的零拷贝完全是在用户态层面的，他更偏向于优化数据操作这样的概念
+Netty 中的零拷贝与操作系统层面上的不太一样，操作系统通过mmap或者sendfile来实现，**Netty的零拷贝完全是在用户态层面的，他更偏向于优化数据操作这样的概念**
 
-- Netty 提供了 `CompositeByteBuf` 类，它可以将多个 ByteBuf 合并为一个逻辑上的 ByteBuf，避免了各个 ByteBuf 之间的拷贝
-- 通过 wrap 操作，我们可以将 byte[] 数组、ByteBuf、ByteBuffer等包装成一个 Netty ByteBuf 对象，进而避免了拷贝操作
-- ByteBuf 支持 slice 操作，因此可以将 ByteBuf 分解为多个共享同一个存储区域的 ByteBuf，避免了内存的拷贝
-- 通过 `FileRegion` 包装的`FileChannel.tranferTo` 实现文件传输，可以直接将文件缓冲区的数据发送到目标 `Channel`，避免了传统通过循环 write 方式导致的内存拷贝问题
+- Netty 提供了 `CompositeByteBuf` 类，**它可以将多个 ByteBuf 合并为一个逻辑上的 ByteBuf，避免了各个 ByteBuf 之间的拷贝**
+- **通过 wrap 操作，我们可以将 byte[] 数组、ByteBuf、ByteBuffer等包装成一个 Netty ByteBuf 对象，**进而避免了拷贝操作
+- **ByteBuf 支持 slice 操作，**因此可以将 ByteBuf 分解为多个共享同一个存储区域的 ByteBuf，避免了内存的拷贝
+- 通过 `FileRegion` 包装的`FileChannel.tranferTo` **实现文件传输，可以直接将文件缓冲区的数据发送到目标 `Channel`，避免了传统通过循环 write 方式导致的内存拷贝问题**
 
 ### 13. Netty 服务端和客户端的启动过程？（Netty启动过程）
 
@@ -1303,10 +1307,6 @@ Netty 支持优雅地关闭连接，这通常通过 ChannelFutureListener 的 on
 6. ChannelHandler
 
 Netty 的 ChannelHandler 机制使得开发者可以方便地添加自定义处理逻辑来处理连接相关的事件，如连接建立、数据接收、异常处理等。这些处理逻辑可以帮助维护长连接的稳定性和有效性。
-
-
-
-6. 
 
 ## 07 Zookeeper
 
@@ -1475,7 +1475,7 @@ ZooKeeper 的**过半机制导致不可能产生 2 个 leader，因为少于等�
 
 **因为分区容忍性（partition tolerance）的存在，就必定要求我们需要在系统可用性（availability）和数据一致性（consistency）中做出权衡** 。这就是著名的 `CAP` 定理。
 
-Eureka 的处理方式，保证了 AP（可用性）； ZooKeeper 的处理方式，它保证了 CP（数据一致性）
+**Eureka 的处理方式，保证了 AP（可用性）； ZooKeeper 的处理方式，它保证了 CP（数据一致性）**
 
 ### 一致性协议和算法
 
@@ -1960,6 +1960,12 @@ zookeeper 的特性就是强一致性，这个不好答，
 在学习中发现 目前很多大数据应用如 **kafka，hadoop，hbase **
 **都是使用 zookeeper 来协调管理服务，所以我考虑采用了 zookeeper 作为注册中心**
 
+**Nginx** 是一个高性能的 HTTP 和反向代理服务器，可以用于负载均衡、反向代理、静态资源服务等，但是并没有服务发现、服务注册等功能
+
+**Eureka**
+
+服务启动时，会将自身的信息（例如服务名称、IP 地址、端口号等）注册到 Eureka 服务器上，服务在需要调用其他服务时，可以从 Eureka 服务器获取已注册的服务实例列表，然后调用，比较轻量级
+
 ### 3. 注册中心的意义？
 
 ①服务注册与发现：注册中心实现了微服务架构中各个微服务的服务注册与发现，这是其最基础也是最重要的功能。通过注册中心，各个微服务可以将自己的地址信息（如IP地址、端口号等）注册到中心，同时也能够从中发现其他微服务的地址信息。
@@ -1974,17 +1980,29 @@ zookeeper 的特性就是强一致性，这个不好答，
 
 1. 服务注册目录
 
-首先，需要定义一个根目录来存放所有服务的信息。这个根目录可以是任意命名，例如 `/services` 或 `/registry`。
+首先，**需要定义一个根目录来存放所有服务的信息。这个根目录可以是任意命名，例如** `/services` 或 `/registry`。
 
 2. 服务名称节点
 
-在根目录下，为每个服务创建一个节点，节点名通常是服务的名字。例如，对于一个名为 `UserService` 的服务，可以创建一个名为 `/services/UserService` 的节点。
+在根目录下**，为每个服务创建一个节点，节点名通常是服务的名字。例**如，对于一个名为 `UserService` 的服务，可以创建一个名为 `/services/UserService` 的节点。
 
 3. 服务实例节点
 
-在每个服务节点下，为每个服务实例创建一个临时节点（ephemeral node）。临时节点的特点是，当创建它的客户端断开连接时，该节点会被自动删除。这样可以保证失效的服务实例能够被及时清除。
+**在每个服务节点下，为每个服务实例创建一个临时节点（ephemeral node）。临时节点的特点是，当创建它的客户端断开连接时，该节点会被自动删除。这样可以保证失效的服务实例能够被及时清除。**
 
-每个服务实例节点的命名可以包含实例的唯一标识信息，例如 IP 地址和端口号。例如，一个名为 `192.168.1.100:8080` 的服务实例节点可以表示该服务运行在 IP 地址为 `192.168.1.100` 的机器上，端口号为 `8080`。
+**每个服务实例节点的命名可以包含实例的唯一标识信息，例如 IP 地址和端口号。**例如，一个名为 `192.168.1.100:8080` 的服务实例节点可以表示该服务运行在 IP 地址为 `192.168.1.100` 的机器上，端口号为 `8080`。
+
+> 服务注册与发现机制中，服务名通常作为一个标识来区分不同的服务。服务名（或称服务ID）在整个系统中是相对静态的，即使提供该服务的具体实例（服务器）可能会变化或下线，服务本身仍然存在。因此，服务名通常被注册为Zookeeper中的持久节点（Persistent Node），这意味着即使创建该节点的客户端断开连接，该节点也会一直保留下来。这样做的好处是：
+>
+> 稳定性：即使服务实例发生变化，服务名依然存在，确保服务发现的一致性和可靠性。
+> 可预测性：服务消费者可以根据稳定的服务名来查找当前可用的服务实例列表。
+> 管理方便：对于管理员来说，查看某个服务的所有实例变得简单，只需要查看该服务名下的子节点即可。
+> 而服务地址（即提供服务的具体机器的地址和端口），则是一个动态的信息。随着服务提供者的上线和下线，这些信息会不断变化。因此，服务地址通常被注册为临时节点（Ephemeral Node）。临时节点的特点是在创建它的客户端与Zookeeper的连接断开时，该节点就会自动被删除。这样做的目的是：
+>
+> 自动清理：当服务提供者下线时，其对应的临时节点会自动删除，不需要额外的逻辑来处理过期服务的清理工作。
+> 实时性：服务消费者可以从Zookeeper中实时获取当前在线的服务实例列表。
+> 故障检测：由于临时节点的存在依赖于客户端与Zookeeper的连接状态，所以临时节点也可以用来进行简单的健康检查或心跳监测。
+> 总之，通过这种设计，系统可以自动维护一个动态的服务实例列表，同时保持服务名的稳定性，从而简化了服务管理和故障恢复的过程。
 
 ### 5. 服务提供者的掉线处理逻辑
 
@@ -2012,7 +2030,19 @@ zookeeper 的特性就是强一致性，这个不好答，
 
    更新服务消费者的本地缓存，确保缓存中的服务实例列表是最新的。
 
+### 6. 别人要怎么使用你的rpc框架(部署rpc)
 
+将RPC框架打包成一个JAR文件
+
+上传到公司内部的Maven仓库
+
+使用者只需在他们的项目中添加对你RPC框架的Maven依赖
+
+需要在他们的服务端项目中使用你的RPC框架来暴露服务，也就是用`@RpcService`，暴露服务
+
+客户端使用使用`@RpcReference`注解来注入RPC接口，然后调用远程方法
+
+连接到一个Nacos服务器，并在配置中指定相应的Nacos地址
 
 ## 09 客户端建立本地服务缓存并实时更新
 
@@ -2027,27 +2057,28 @@ zookeeper 的特性就是强一致性，这个不好答，
 
    1. 如何更新缓存？
 
-      首先去本地缓存中读，读不到，再去注册中心中读，返回数据时刷新缓存....等等老生常谈的八股
-
-      如果一个服务在注册中心中新增了一个地址，但是调用方始终能在本地缓存中读到这个服务，**那么 新增的变化就永远无法感知
-
+      > 首先去本地缓存中读，读不到，再去注册中心中读，返回数据时刷新缓存....等等老生常谈的八股
+      >
+      > 如果一个服务在注册中心中新增了一个地址，但是调用方始终能在本地缓存中读到这个服务，**那么 新增的变化就永远无法感知
+      >
+   
       **如何解决？**
-
+   
       通过在注册中心注册Watcher，监听注册中心的变化，实现本地缓存的动态更新
-
+   
       ​	客户端**首先将 `Watcher`注册到服务端**，同时将 `Watcher`对象**保存到客户端的`watch`管理器中**。
       ​	当`Zookeeper`服务端监听的数据状态发生变化时，服务端会**主动通知客户端**，
       ​	接着客户端的 `Watch`管理器会**触发相关 `Watcher`**来回调相应处理逻辑，从而完成整体的数据 `发布/订阅`流程
-
+   
    2. **在ZKServiceCenter 加入缓存和监听器**
-
+   
    
 
 ### **1.本地缓存怎么做的？能保证缓存和服务的一致性吗？**
 
 在客户端设计一个缓存层，每次调用服务时从缓存层中获取地址，避免直接调用注册中心，优化速度和资源
 
-可以。这里使用了zookeeper的监听机制，在服务节点上注册Watcher，当注册中心的服务地址发生改动时，Watcher会异步通知客户端的缓存层修改对应的地址，从而实现两者的一致性
+可以。这里使用了zookeeper的监听机制，在服务节点上注册Watcher，**当注册中心的服务地址发生改动时，Watcher会异步通知客户端的缓存层修改对应的地址，从而实现两者的一致性**
 
 
 
@@ -2266,8 +2297,6 @@ public ZKServiceCenter() throws InterruptedException {
 }
 ```
 
-
-
 ## 10 自定义编码器、解码器和序列化器
 
 netty中的重要组件：
@@ -2382,7 +2411,7 @@ decoder 读取字节数组，获得里面的对象
 
 ![image-20240813150328363](https://raw.githubusercontent.com/Xiaoxi121/xiaoxi.github.image/main/img/image-20240813150328363.png)
 
-我的消息头包括：魔法数(4B)、版本(1B)、**消息长度(4B)、消息类型(1B)**、压缩类型(1B)、序列化类型(1B)、请求Id(4B)
+我的消息头包括：魔法数(4B)、版本(1B)、**消息长度(4B)、消息类型(1B)**、压缩类型(1B)、**序列化类型(1B)**、请求Id(4B)
 
 魔法数主要是为了筛选来到服务端的数据包，有了这个魔数之后，服务端首先取出前面四个字节进行比对，能够在第一时间识别出这个数据包并非是遵循自定义协议的，也就是无效数据包，为了安全考虑可以直接关闭连接以节省资源
 
@@ -2663,10 +2692,6 @@ ProtoStuff 是一个高性能的 Java 序列化框架，基于 protobuf 协议�
 
 
 
-
-
-
-
 ## 11 负载均衡
 
 在之前的版本中，当客户端请求服务时，取 **从注册中心返回的服务地址列表中的第一个 作为访问的地址**
@@ -2925,15 +2950,11 @@ LRU的思想可以被借鉴用于负载均衡。例如可以设计一个基于�
 
 算法题地址：https://leetcode.cn/problems/lru-cache/
 
-
-
 ### 2.当各个服务器的负载能力不一致时，该怎么设置负载均衡算法，来保证各服务器接收到的流量是合适的呢？
 
 前面学习过一致性哈希算法 就会知道，在一致性哈希算法中，使用虚拟节点对真实节点进行映射，并且能通过设置虚拟节点的个数 来控制该节点接收到请求的概率。
 
 所以在服务器负载能力不一致的情况下，我们可以在服务端将服务器的负载能力写入到注册中心中，客户端在进行负载均衡时会在注册中心中获取各服务器的能力，并设置对应的虚拟节点的数量，来控制流量的分发。
-
-
 
 ### 3. 自适应的负载均衡
 
@@ -2951,13 +2972,11 @@ RPC 的负载均衡完全由 RPC 框架自身实现，服务调用者发起请�
 
 - 可以配合一致性哈希的的负载均衡策略去控制，**通过最终的指标分数修改服务节点最终的权重，即动态去修改对应的虚拟节点的数量**
 
-
-
 ### **4. 某个服务多个节点承压能力不一，怎么办？**
 
 ​	前面学习过一致性哈希算法 就会知道，在一致性哈希算法中，使用虚拟节点对真实节点进行映射，并且能通过设置虚拟节点的个数 来控制该节点接收到请求的概率。
 
-​	所以在服务器负载能力不一致的情况下，我们可以在服务端将服务器的负载能力写入到注册中心中，客户端在进行负载均衡时会在注册中心中获取各服务器的能力，并设置对应的虚拟节点的数量，来控制流量的分发。
+​	**所以在服务器负载能力不一致的情况下，我们可以在服务端将服务器的负载能力写入到注册中心中，客户端在进行负载均衡时会在注册中心中获取各服务器的能力，并设置对应的虚拟节点的数量，来控制流量的**分发。
 
 ​	这里可以拓展一下自适应负载均衡的实现
 
@@ -3165,8 +3184,6 @@ public class ClientProxy implements InvocationHandler {
 }
 ```
 
-
-
 ### **1. 网络抖动导致某个节点被下线了，过一会网络好了，考虑过这个问题吗？**
 
 当调用端发起的请求失败时，RPC 框架自身可以进行重试，再重新发送请求，通过这种方式保证系统的容错率；
@@ -3184,8 +3201,6 @@ public class ClientProxy implements InvocationHandler {
 所以，我们可以**设置一个白名单**，服务端在注册节点时，将幂等性的服务注册在白名单中，客户端在请求服务前，先去白名单中查看该服务是否为幂等服务，如果是的话使用重试框架进行调用
 
 白名单存放在zookeeper中（充当配置中心的角色）
-
-
 
 
 
@@ -3239,11 +3254,9 @@ public interface RateLimit {
 }
 ```
 
-
-
 **TokenBucketRateLimitImpl类实现RateLimit 接口**
 
-capacity为当前令牌桶的中令牌数量，timeStamp为上一次请求获取令牌的时间，我们没必要真的实现计时器每秒产生多少令牌放入容器中，只要记住上一次请求到来的时间，和这次请求的差值就知道在这段时间内产生了多少令牌
+capacity为当前令牌桶的中令牌数量，timeStamp为上一次请求获取令牌的时间**，我们没必要真的实现计时器每秒产生多少令牌放入容器中，只要记住上一次请求到来的时间，和这次请求的差值就知道在这段时间内产生了多少令牌**
 
 ```java
 public class TokenBucketRateLimitImpl implements RateLimit {
@@ -3288,8 +3301,6 @@ public class TokenBucketRateLimitImpl implements RateLimit {
 }
 ```
 
-
-
 **RateLimitProvider类维护每个服务对应限流器，并负责向外提供限流器**
 
 ```java
@@ -3306,8 +3317,6 @@ public class RateLimitProvider {
     }
 }
 ```
-
-
 
 **将RateLimitProvider嵌入到ServiceProvider类中，以便于调用**
 
@@ -3567,7 +3576,7 @@ HTTP 的设计更多是为 web 场景优化，而在纯粹的 RPC 调用中，TC
 
 **远程过程调用**，比如，微服务项目：服务提供者和服务消费者运行在两台不同物理机上的不同进程内，它们之间的调用相比于本地方法调用，可称之为远程方法调用，内部集群的微服务之间则采用 RPC 协议进行通讯
 
-RPC框架一般使用长链接，不必每次通信都要3次握手，减少网络开销。
+**RPC框架一般使用长链接，不必每次通信都要3次握手，减少网络开销。**
 
 ## 6. Rpc框架中提到的两个BeanPostProcessor是做什么的？
 
@@ -3786,21 +3795,7 @@ Nacos会主动通知客户端，这个机制基于 **订阅-发布** 模型，�
 
    **服务提供者** 更新服务实例信息（例如状态变更），并将更新请求发送到 Nacos Server，**Nacos Server** 更新其内部服务实例信息，并通知所有订阅该服务的消费者（通过长轮询）
 
-### Nacos原理，与zk的区别，与nginx的区别，为什么不用nginx呢?Nacos/Zookeeper/Nginx
 
-在网上了解到，zk在高并发，或者长时间维持一定量的请求，那么还是会导致zk的磁盘耗尽、io读写异常、导致zk不可用，从而导致整个集群的服务注册发型能力不可用；而且当 master 节点因为网络故障与其他节点失去联系时，剩余节点会重新进行 leader 选举。问题在于，选举 leader 的时间太长，30 ~ 120s, 且选举期间整个 zk 集群都是不可用的，这就导致在选举期间注册服务瘫痪，nacos中的一致性不是像zk通过节点数据进行维护，并不会出现服务无限重复注册的情况
-
-**Nginx** 是一个高性能的 HTTP 和反向代理服务器，可以用于负载均衡、反向代理、静态资源服务等，但是并没有服务发现、服务注册等功能
-
-### 注册中心除了Nacos还有哪些？
-
-**Zookeeper**
-
-服务提供者在 ZooKeeper 上注册自己的服务信息，包括服务名称、地址、端口等。注册的信息存储在 ZooKeeper 的 ZNode 中，ZNode 类似于一个目录，可以存储服务的各种元数据，服务消费者可以从 ZooKeeper 中查找服务。通过查询 ZooKeeper 上的注册信息，消费者能够获得可用的服务实例列表，从而实现服务发现
-
-**Eureka**
-
-服务启动时，会将自身的信息（例如服务名称、IP 地址、端口号等）注册到 Eureka 服务器上，服务在需要调用其他服务时，可以从 Eureka 服务器获取已注册的服务实例列表，然后调用，比较轻量级
 
 ### rpc项目的整体架构
 
@@ -3836,19 +3831,7 @@ Netty服务端，负责启动服务器并监听客户端请求，处理来自客
 
 负责将 Java 对象转换为字节流，以及将字节流还原为 Java 对象，我使用的是Kryo
 
-### 别人要怎么使用你的rpc框架(部署rpc)
 
-将RPC框架打包成一个JAR文件
-
-上传到公司内部的Maven仓库
-
-使用者只需在他们的项目中添加对你RPC框架的Maven依赖
-
-需要在他们的服务端项目中使用你的RPC框架来暴露服务，也就是用`@RpcService`，暴露服务
-
-客户端使用使用`@RpcReference`注解来注入RPC接口，然后调用远程方法
-
-连接到一个Nacos服务器，并在配置中指定相应的Nacos地址
 
 ### 如果遇到网络拥塞、超时等异常情况该如何处理?
 
@@ -3875,11 +3858,6 @@ Netty服务端，负责启动服务器并监听客户端请求，处理来自客
 如果一个服务地址调用失败，框架可以尝试调用同一服务的其他实例。可以通过服务发现机制获取可用的服务实例列表，然后进行轮询或随机选择进行重试，在重试多次后，如果所有实例都无法成功调用，系统可以触发服务降级逻辑
 
 如果接口问题导致多次重试失败，框架可以自动回退到上一个版本的服务地址
-
-### dubbo和你的rpc框架？你怎么评价他们的差异？
-
-- Dubbo 是一个成熟的分布式服务框架，支持多种注册中心，如 Zookeeper、Nacos、Consul 等，并且可以选择不同的序列化机制。Dubbo 拥有一个庞大的社区和生态系统，有大量的开源插件和扩展支持
-- 基本的 RPC 功能，包括服务注册、发现、序列化和反序列化、以及客户端与服务端的通信。虽然功能上较为基础，但它为你提供了更大的灵活性，可以根据具体需求进行深度定制。与 Dubbo 相比，你的框架可能更轻量化，但需要在功能和稳定性上进行更多的开发与测试。
 
 ### 你的RPC框架跟springboot有什么关系？
 
