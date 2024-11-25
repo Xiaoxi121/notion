@@ -221,8 +221,6 @@ CGLIB 动态代理类使用步骤：
 - **JDK** **动态代理只能代理实现了接口的类，而** **CGLIB** **可以代理未实现任何接口的类。** 另外， CGLIB 动态代理是通过生成一个被代理类的子类来拦截被代理类的方法调用，因此不能代理声明为 final 类型的类和方法。
 - 大部分情况都是 JDK 动态代理效率更优秀。
 
-
-
 ### 定义消息格式
 
 在common包中
@@ -778,7 +776,7 @@ Netty是一个**异步**事件驱动的 **网络应用程序框架** 用于 快�
 
 Netty是目前所有NIO框架中性能最好的框架。
 
-### 3. Netty和Scoket的区别
+### 3. Netty和Socket的区别
 
 **socket**
 
@@ -1424,7 +1422,7 @@ Session 有一个属性叫做：`sessionTimeout` ，`sessionTimeout` 代表会�
 ### ------Zookeeper集群--------
 
 最典型集群模式**：Master/Slave 模式（主备模式）**。
-在这种模式中，**通常 Master 服务器作为主服务器提供写服务，其他的 Slave 服务器从服务器通过异步复制的方式获取 Master 服务器最新的数据提**供读服务
+在这种模式中，**通常 Master 服务器作为主服务器提供写服务，其他的 Slave 服务器从服务器通过异步复制的方式获取 Master 服务器最新的数据提**供读服务。
 
 ### Zookeeper集群角色
 
@@ -1714,7 +1712,6 @@ TestClient中如下
 
         User user = proxy.getUserByUserId(1);
         System.out.println("从服务端得到的user="+user.toString());
-
 ```
 
 ClientProxy中也一样，去掉ip和port变量
@@ -1727,7 +1724,7 @@ public class ClientProxy implements InvocationHandler {
     public ClientProxy(){
         rpcClient=new NettyRpcClient();
     }
-
+    
     //jdk动态代理，每一次代理对象调用方法，都会经过此方法增强（反射获取request对象，socket发送到服务端）
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -2301,7 +2298,7 @@ public ZKServiceCenter() throws InterruptedException {
 
 netty中的重要组件：
 
-**ChannelHandler 与 ChannelPipeline** 
+ **ChannelHandler 与 ChannelPipeline** 
 
 - **ChannelHandler 是对 Channel 中数据的处理器，这些处理器可以是系统本身定义好的编解码器，也可以是用户自定义的。**
 - **这些处理器会被统一添加到一个 ChannelPipeline 的对象中，然后按照添加的类别对 Channel 中的数据进行依次处理。**
@@ -2952,9 +2949,9 @@ LRU的思想可以被借鉴用于负载均衡。例如可以设计一个基于�
 
 ### 2.当各个服务器的负载能力不一致时，该怎么设置负载均衡算法，来保证各服务器接收到的流量是合适的呢？
 
-前面学习过一致性哈希算法 就会知道，在一致性哈希算法中，使用虚拟节点对真实节点进行映射，并且能通过设置虚拟节点的个数 来控制该节点接收到请求的概率。
+前面学习过一致性哈希算法 就会知道**，在一致性哈希算法中，使用虚拟节点对真实节点进行映射，并且能通过设置虚拟节点的个数 来控制该节点接收到请求的概率。**
 
-所以在服务器负载能力不一致的情况下，我们可以在服务端将服务器的负载能力写入到注册中心中，客户端在进行负载均衡时会在注册中心中获取各服务器的能力，并设置对应的虚拟节点的数量，来控制流量的分发。
+所以**在服务器负载能力不一致的情况下，我们可以在服务端将服务器的负载能力写入到注册中心中，客户端在进行负载均衡时会在注册中心中获取各服务器的能力，并设置对应的虚拟节点的数量，来控制流量的分发。**
 
 ### 3. 自适应的负载均衡
 
